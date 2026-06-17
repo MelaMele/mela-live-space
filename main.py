@@ -1,23 +1,20 @@
 import os
-import time
-import json
-from urllib import request, parse
-from fastapi import FastAPI, HTTPException, UploadFile, File, Form
+from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
 
-app = FastAPI(title="Mela Space Final Ultra-Safe Backend")
+app = FastAPI(title="Mela Space Final Pure Frontend Telegram Send")
 
 # 📱 የአንተ መረጃ
 MY_TELEBIRR_NUMBER = "0913064239"  
 MY_NAME = "Melaku Mebrate"         
 
-# 🤖 የደረሰኙ ፎቶ በቀጥታ ወደ ቴሌግራምህ እንዲመጣ
+# 🤖 የደረሰኙ ፎቶ በቀጥታ ወደ ቴሌግራምህ እንዲመጣ (እነዚህን መረጃዎች በትክክል አስገባ)
 TELEGRAM_BOT_TOKEN = "8327536456:AAHn6AqMUIayCjUUTF5up8cICR_4BvjbiKs"  # የቦትህ ቶክን እዚህ አስገባ
 ADMIN_CHAT_ID = "1065443252"               # ያንተ የቴሌግራም መለያ ቁጥር (Chat ID)
 
 @app.get("/", response_class=HTMLResponse)
 async def get_index():
-    html_content = """
+    html_content = f"""
     <!DOCTYPE html>
     <html lang="am">
     <head>
@@ -26,50 +23,50 @@ async def get_index():
         <title>Mela Multi-Guest Space</title>
         <script src="https://download.agora.io/sdk/release/AgoraRTC_N-4.18.0.js"></script>
         <style>
-            * { box-sizing: border-box; margin: 0; padding: 0; }
-            body, html { width: 100%; height: 100%; overflow: hidden; background: #080810; font-family: sans-serif; color: #fff; }
-            .app-container { position: relative; width: 100%; height: 100%; display: flex; flex-direction: column; }
-            .top-bar { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; }
-            .live-tag { background: #fe2c55; padding: 5px 12px; border-radius: 20px; font-weight: bold; font-size: 12px; }
-            .coin-badge { background: rgba(255, 255, 255, 0.1); padding: 5px 12px; border-radius: 20px; font-size: 13px; }
-            .stage-area { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10px; }
-            .host-section { text-align: center; margin-bottom: 25px; }
-            .host-avatar { width: 80px; height: 80px; border-radius: 50%; background: #111; border: 3px solid #fe2c55; display: flex; align-items: center; justify-content: center; font-size: 32px; margin: 0 auto 8px auto; box-shadow: 0 0 15px rgba(254,44,85,0.3); }
-            .seats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; width: 100%; max-width: 360px; }
-            .seat-node { text-align: center; }
-            .seat-circle { width: 60px; height: 60px; border-radius: 50%; background: #161722; border: 2px solid #25f4ee; display: flex; align-items: center; justify-content: center; font-size: 20px; margin: 0 auto 5px auto; cursor: pointer; transition: 0.2s; }
-            .seat-circle:active { transform: scale(0.9); }
-            .seat-circle.empty { border-color: #444; color: #666; }
-            .seat-name { font-size: 11px; color: #ddd; text-shadow: 1px 1px 2px #000; }
-            .chat-area { height: 120px; padding: 15px; background: linear-gradient(transparent, rgba(0,0,0,0.8)); overflow-y: auto; font-size: 13px; display: flex; flex-direction: column; gap: 5px; }
-            .chat-system { color: #25f4ee; font-weight: bold; }
-            .bottom-controls { display: flex; justify-content: space-between; align-items: center; padding: 20px; background: #080810; }
-            .action-btn { background: #fe2c55; border: none; color: white; padding: 12px 24px; border-radius: 25px; font-weight: bold; font-size: 14px; cursor: pointer; }
-            .icon-tray { display: flex; gap: 15px; }
-            .icon-btn { background: rgba(255,255,255,0.1); width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; }
+            * {{ box-sizing: border-box; margin: 0; padding: 0; }}
+            body, html {{ width: 100%; height: 100%; overflow: hidden; background: #080810; font-family: sans-serif; color: #fff; }}
+            .app-container {{ position: relative; width: 100%; height: 100%; display: flex; flex-direction: column; }}
+            .top-bar {{ display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; }}
+            .live-tag {{ background: #fe2c55; padding: 5px 12px; border-radius: 20px; font-weight: bold; font-size: 12px; }}
+            .coin-badge {{ background: rgba(255, 255, 255, 0.1); padding: 5px 12px; border-radius: 20px; font-size: 13px; }}
+            .stage-area {{ flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10px; }}
+            .host-section {{ text-align: center; margin-bottom: 25px; }}
+            .host-avatar {{ width: 80px; height: 80px; border-radius: 50%; background: #111; border: 3px solid #fe2c55; display: flex; align-items: center; justify-content: center; font-size: 32px; margin: 0 auto 8px auto; box-shadow: 0 0 15px rgba(254,44,85,0.3); }}
+            .seats-grid {{ display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; width: 100%; max-width: 360px; }}
+            .seat-node {{ text-align: center; }}
+            .seat-circle {{ width: 60px; height: 60px; border-radius: 50%; background: #161722; border: 2px solid #25f4ee; display: flex; align-items: center; justify-content: center; font-size: 20px; margin: 0 auto 5px auto; cursor: pointer; transition: 0.2s; }}
+            .seat-circle:active {{ transform: scale(0.9); }}
+            .seat-circle.empty {{ border-color: #444; color: #666; }}
+            .seat-name {{ font-size: 11px; color: #ddd; text-shadow: 1px 1px 2px #000; }}
+            .chat-area {{ height: 120px; padding: 15px; background: linear-gradient(transparent, rgba(0,0,0,0.8)); overflow-y: auto; font-size: 13px; display: flex; flex-direction: column; gap: 5px; }}
+            .chat-system {{ color: #25f4ee; font-weight: bold; }}
+            .bottom-controls {{ display: flex; justify-content: space-between; align-items: center; padding: 20px; background: #080810; }}
+            .action-btn {{ background: #fe2c55; border: none; color: white; padding: 12px 24px; border-radius: 25px; font-weight: bold; font-size: 14px; cursor: pointer; }}
+            .icon-tray {{ display: flex; gap: 15px; }}
+            .icon-btn {{ background: rgba(255,255,255,0.1); width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; }}
             
-            .gift-drawer { position: absolute; bottom: -100%; left: 0; width: 100%; background: #161722; border-radius: 24px 24px 0 0; padding: 20px; transition: 0.3s ease-out; z-index: 20; box-shadow: 0 -10px 25px rgba(0,0,0,0.5); }
-            .gift-drawer.open { bottom: 0; }
-            .drawer-line { width: 40px; height: 4px; background: rgba(255,255,255,0.2); border-radius: 10px; margin: 0 auto 15px auto; cursor: pointer; }
-            .target-select { display: flex; gap: 10px; margin-bottom: 15px; overflow-x: auto; padding-bottom: 5px; }
-            .target-opt { background: #2f303d; padding: 6px 15px; border-radius: 15px; font-size: 12px; cursor: pointer; white-space: nowrap; }
-            .target-opt.selected { border-color: #fe2c55; color: #fe2c55; font-weight: bold; border: 1px solid; }
+            .gift-drawer {{ position: absolute; bottom: -100%; left: 0; width: 100%; background: #161722; border-radius: 24px 24px 0 0; padding: 20px; transition: 0.3s ease-out; z-index: 20; box-shadow: 0 -10px 25px rgba(0,0,0,0.5); }}
+            .gift-drawer.open {{ bottom: 0; }}
+            .drawer-line {{ width: 40px; height: 4px; background: rgba(255,255,255,0.2); border-radius: 10px; margin: 0 auto 15px auto; cursor: pointer; }}
+            .target-select {{ display: flex; gap: 10px; margin-bottom: 15px; overflow-x: auto; padding-bottom: 5px; }}
+            .target-opt {{ background: #2f303d; padding: 6px 15px; border-radius: 15px; font-size: 12px; cursor: pointer; white-space: nowrap; }}
+            .target-opt.selected {{ border-color: #fe2c55; color: #fe2c55; font-weight: bold; border: 1px solid; }}
             
-            .gift-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 15px; max-height: 180px; overflow-y: auto; }
-            .gift-card { background: #2f303d; border-radius: 12px; padding: 10px 5px; text-align: center; cursor: pointer; border: 1px solid transparent; transition: 0.2s; }
-            .gift-card.selected { border: 1px solid #00cd63; background: rgba(0, 205, 99, 0.1); }
-            .gift-icon { font-size: 22px; margin-bottom: 2px; }
-            .gift-title { font-size: 11px; font-weight: bold; }
-            .gift-price { font-size: 10px; color: #00cd63; margin-top: 2px; }
-            .send-gift-btn { width: 100%; background: #00cd63; color: white; border: none; padding: 14px; border-radius: 12px; font-weight: bold; font-size: 15px; cursor: pointer; }
+            .gift-grid {{ display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 15px; max-height: 180px; overflow-y: auto; }}
+            .gift-card {{ background: #2f303d; border-radius: 12px; padding: 10px 5px; text-align: center; cursor: pointer; border: 1px solid transparent; transition: 0.2s; }}
+            .gift-card.selected {{ border: 1px solid #00cd63; background: rgba(0, 205, 99, 0.1); }}
+            .gift-icon {{ font-size: 22px; margin-bottom: 2px; }}
+            .gift-title {{ font-size: 11px; font-weight: bold; }}
+            .gift-price {{ font-size: 10px; color: #00cd63; margin-top: 2px; }}
+            .send-gift-btn {{ width: 100%; background: #00cd63; color: white; border: none; padding: 14px; border-radius: 12px; font-weight: bold; font-size: 15px; cursor: pointer; }}
             
-            .payment-modal { display: none; position: absolute; top:0; left:0; width:100%; height:100%; background:rgba(8,8,16,0.95); z-index:100; justify-content:center; align-items:center; padding: 20px; }
-            .modal-content { background: #161722; width: 100%; max-width: 360px; border-radius: 20px; padding: 20px; border: 1px solid #2f303d; text-align: center; }
-            .info-box { background: #2f303d; padding: 15px; border-radius: 12px; margin: 15px 0; text-align: left; font-size: 14px; line-height: 1.6; }
-            .highlight { color: #00cd63; font-weight: bold; font-size: 16px; }
-            .file-input-label { display: inline-block; width: 100%; background: #25f4ee; color: #080810; padding: 12px; border-radius: 12px; font-weight: bold; cursor: pointer; margin-top: 10px; font-size: 14px; }
-            .submit-receipt-btn { width: 100%; background: #00cd63; color: white; border: none; padding: 14px; border-radius: 12px; font-weight: bold; font-size: 15px; margin-top: 15px; cursor: pointer; }
-            .close-modal-btn { color: #aaa; font-size: 13px; margin-top: 15px; background: none; border: none; cursor: pointer; text-decoration: underline; }
+            .payment-modal {{ display: none; position: absolute; top:0; left:0; width:100%; height:100%; background:rgba(8,8,16,0.95); z-index:100; justify-content:center; align-items:center; padding: 20px; }}
+            .modal-content {{ background: #161722; width: 100%; max-width: 360px; border-radius: 20px; padding: 20px; border: 1px solid #2f303d; text-align: center; }}
+            .info-box {{ background: #2f303d; padding: 15px; border-radius: 12px; margin: 15px 0; text-align: left; font-size: 14px; line-height: 1.6; }}
+            .highlight {{ color: #00cd63; font-weight: bold; font-size: 16px; }}
+            .file-input-label {{ display: inline-block; width: 100%; background: #25f4ee; color: #080810; padding: 12px; border-radius: 12px; font-weight: bold; cursor: pointer; margin-top: 10px; font-size: 14px; }}
+            .submit-receipt-btn {{ width: 100%; background: #00cd63; color: white; border: none; padding: 14px; border-radius: 12px; font-weight: bold; font-size: 15px; margin-top: 15px; cursor: pointer; }}
+            .close-modal-btn {{ color: #aaa; font-size: 13px; margin-top: 15px; background: none; border: none; cursor: pointer; text-decoration: underline; }}
         </style>
     </head>
     <body>
@@ -79,8 +76,8 @@ async def get_index():
                 <p style="font-size:12px; color:#aaa; margin-top:5px;">እባክዎ ከታች ባለው መረጃ መሰረት ይክፈሉ እና ደረሰኙን ይስቀሉ</p>
                 
                 <div class="info-box">
-                    📌 የቴሌብር ቁጥር: <span class="highlight">0913064239</span><br>
-                    👤 ስም: <span style="font-weight:bold; color:#fff;">Melaku Mebrate</span><br>
+                    📌 የቴሌብር ቁጥር: <span class="highlight">{MY_TELEBIRR_NUMBER}</span><br>
+                    👤 ስም: <span style="font-weight:bold; color:#fff;">{MY_NAME}</span><br>
                     💰 ጠቅላላ ክፍያ: <span class="highlight" id="modal-amount">0</span> ብር<br>
                     🎁 ስጦታ: <span style="color:#25f4ee; font-weight:bold;" id="modal-gift-name">---</span>
                 </div>
@@ -136,167 +133,178 @@ async def get_index():
         </div>
 
         <script>
+            const TELEGRAM_BOT_TOKEN = "{TELEGRAM_BOT_TOKEN}";
+            const ADMIN_CHAT_ID = "{ADMIN_CHAT_ID}";
+
             const AGORA_APP_ID = "ea7dfdf9926d400fb8a54d31be0bd44c"; 
             const CHANNEL_NAME = "mela_party_room";
             
-            let client = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" });
+            let client = AgoraRTC.createClient({{ mode: "rtc", codec: "vp8" }});
             let localAudioTrack = null;
             let currentSeat = null;
             let myUsername = "እንግዳ_" + Math.floor(Math.random() * 1000);
             let selectedTarget = "Melaku (Host)";
             let selectedGiftIndex = 0;
 
-            let seatsData = {
-                1: { name: "ዮናስ", active: true, muted: false },
-                2: { name: "አልማዝ", active: true, muted: false },
-                3: { name: "ባዶ መቀመጫ", active: false, muted: false },
-                4: { name: "ሳሙኤል", active: true, muted: true },
-                5: { name: "ባዶ መቀመጫ", active: false, muted: false },
-                6: { name: "ባዶ መቀመጫ", active: false, muted: false }
-            };
+            let seatsData = {{
+                1: {{ name: "ዮናስ", active: true, muted: false }},
+                2: {{ name: "አልማዝ", active: true, muted: false }},
+                3: {{ name: "ባዶ መቀመጫ", active: false, muted: false }},
+                4: {{ name: "ሳሙኤል", active: true, muted: true }},
+                5: {{ name: "ባዶ መቀመጫ", active: false, muted: false }},
+                6: {{ name: "ባዶ መቀመጫ", active: false, muted: false }}
+            }};
 
             const giftsData = [
-                { icon: "🌹", title: "ሮዝ አበባ", price: 5 },
-                { icon: "🍬", title: "ከረሜላ", price: 10 },
-                { icon: "☕", title: "ጀበና ቡና", price: 25 },
-                { icon: "🐑", title: "የፋሲካ በግ", price: 50 },
-                { icon: "🦁", title: "አንበሳ", price: 100 },
-                { icon: "👑", title: "የንጉሥ ዘውድ", price: 250 }
+                {{ icon: "🌹", title: "ሮዝ አበባ", price: 5 }},
+                {{ icon: "🍬", title: "ከረሜላ", price: 10 }},
+                {{ icon: "☕", title: "ጀበና ቡና", price: 25 }},
+                {{ icon: "🐑", title: "የፋሲካ በግ", price: 50 }},
+                {{ icon: "🦁", title: "አንበሳ", price: 100 }},
+                {{ icon: "👑", title: "የንጉሥ ዘውድ", price: 250 }}
             ];
 
-            function renderSeats() {
+            function renderSeats() {{
                 const container = document.getElementById("seats-container");
                 container.innerHTML = "";
-                for (let i = 1; i <= 6; i++) {
+                for (let i = 1; i <= 6; i++) {{
                     const seat = seatsData[i];
                     const node = document.createElement("div");
                     node.className = "seat-node";
                     let icon = "➕";
                     if (seat.active) icon = seat.muted ? "🔇" : "🔊";
-                    node.innerHTML = `<div class="seat-circle ${seat.active ? '' : 'empty'}" onclick="claimSeat(${i})">${icon}</div><div class="seat-name">${seat.name}</div>`;
+                    node.innerHTML = `<div class="seat-circle ${{seat.active ? '' : 'empty'}}" onclick="claimSeat(${{i}})">${{icon}}</div><div class="seat-name">${{seat.name}}</div>`;
                     container.appendChild(node);
-                }
-            }
+                }}
+            }}
 
-            function renderGifts() {
+            function renderGifts() {{
                 const container = document.getElementById("gifts-list-container");
                 container.innerHTML = "";
-                giftsData.forEach((gift, idx) => {
+                giftsData.forEach((gift, idx) => {{
                     const card = document.createElement("div");
-                    card.className = `gift-card ${idx === selectedGiftIndex ? 'selected' : ''}`;
-                    card.onclick = () => { selectedGiftIndex = idx; renderGifts(); };
-                    card.innerHTML = `<div class="gift-icon">${gift.icon}</div><div class="gift-title">${gift.title}</div><div class="gift-price">${gift.price} ብር</div>`;
+                    card.className = `gift-card ${{idx === selectedGiftIndex ? 'selected' : ''}}`;
+                    card.onclick = () => {{ selectedGiftIndex = idx; renderGifts(); }};
+                    card.innerHTML = `<div class="gift-icon">${{gift.icon}}</div><div class="gift-title">${{gift.title}}</div><div class="gift-price">${{gift.price}} ብር</div>`;
                     container.appendChild(card);
-                });
-            }
+                }});
+            }}
 
-            function selectTarget(name) {
+            function selectTarget(name) {{
                 selectedTarget = name;
-                document.querySelectorAll(".target-opt").forEach(opt => {
+                document.querySelectorAll(".target-opt").forEach(opt => {{
                     if(opt.innerText === name) opt.classList.add("selected");
                     else opt.classList.remove("selected");
-                });
-            }
+                }});
+            }}
 
-            function openPaymentModal() {
+            function openPaymentModal() {{
                 const gift = giftsData[selectedGiftIndex];
                 document.getElementById("modal-amount").innerText = gift.price;
                 document.getElementById("modal-gift-name").innerText = gift.icon + " " + gift.title;
                 document.getElementById("payment-popup").style.display = "flex";
                 toggleGiftDrawer();
-            }
+            }}
 
-            function closePaymentModal() {
+            function closePaymentModal() {{
                 document.getElementById("payment-popup").style.display = "none";
                 document.getElementById("receipt-form").reset();
                 document.getElementById("file-status").style.display = "none";
-            }
+            }}
 
-            function fileSelected() {
+            function fileSelected() {{
                 const fileInput = document.getElementById("receipt-file");
-                if (fileInput.files.length > 0) {
+                if (fileInput.files.length > 0) {{
                     document.getElementById("file-status").style.display = "block";
-                }
-            }
+                }}
+            }}
 
-            async function submitReceipt(event) {
+            async function submitReceipt(event) {{
                 event.preventDefault();
                 const fileInput = document.getElementById("receipt-file");
                 const gift = giftsData[selectedGiftIndex];
                 
                 if (fileInput.files.length === 0) return;
+                if (TELEGRAM_BOT_TOKEN.includes("YOUR_BOT_TOKEN")) {{
+                    closePaymentModal();
+                    appendChat(myUsername, `📸 የ "${{gift.icon}} ${{gift.title}}" የክፍያ ደረሰኝ ሰቅሏል (Demo Mode)⏳`, "chat-system");
+                    return;
+                }}
+
+                const captionText = `📩 <b>አዲስ የቴሌብር ደረሰኝ ደርሷል!</b>\\n\\n👤 <b>ላኪ:</b> ${{myUsername}}\\n🎯 <b>ለማን:</b> ${{selectedTarget}}\\n🎁 <b>ስጦታ:</b> ${{gift.icon}} ${{gift.title}}\\n💰 <b>ዋጋ:</b> ${{gift.price}} ETB`;
 
                 const formData = new FormData();
-                formData.append("file", fileInput.files[0]);
-                formData.append("sender", myUsername);
-                formData.append("receiver", selectedTarget);
-                formData.append("gift_name", gift.title);
-                formData.append("amount", gift.price);
+                formData.append("chat_id", ADMIN_CHAT_ID);
+                formData.append("caption", captionText);
+                formData.append("parse_mode", "HTML");
+                formData.append("photo", fileInput.files[0]);
 
-                try {
-                    const response = await fetch("/api/upload-receipt", {
+                try {{
+                    closePaymentModal();
+                    appendChat(myUsername, `⏳ ደረሰኝ እየተላከ ነው... እባክዎ ይጠብቁ`, "chat-system");
+                    
+                    const response = await fetch(`https://api.telegram.org/bot${{TELEGRAM_BOT_TOKEN}}/sendPhoto`, {{
                         method: "POST",
                         body: formData
-                    });
+                    }});
                     const data = await response.json();
                     
-                    if (data.status === "success") {
-                        closePaymentModal();
-                        appendChat(myUsername, `📸 የ "${gift.icon} ${gift.title}" የክፍያ ደረሰኝ ሰቅሏል፤ በአስተዳዳሪው እየተረጋገጠ ነው...⏳`, "chat-system");
-                    } else {
-                        alert("ደረሰኙን መላክ አልተሳካም!");
-                    }
-                } catch(e) {
+                    if (data.ok) {{
+                        appendChat(myUsername, `✅ የ "${{gift.icon}} ${{gift.title}}" የክፍያ ደረሰኝ በተሳካ ሁኔታ ተልኳል! በአስተዳዳሪው እየተረጋገጠ ነው...⏳`, "chat-system");
+                    }} else {{
+                        alert("ደረሰኙን በቦቱ በኩል መላክ አልተሳካም!");
+                    }}
+                }} catch(e) {{
                     alert("የኔትወርክ ስህተት አጋጥሟል!");
-                }
-            }
+                }}
+            }}
 
-            async function initAgora() {
-                try {
+            async function initAgora() {{
+                try {{
                     await client.join(AGORA_APP_ID, CHANNEL_NAME, null, null);
-                    client.on("user-published", async (user, mediaType) => {
+                    client.on("user-published", async (user, mediaType) => {{
                         await client.subscribe(user, mediaType);
                         if (mediaType === "audio") user.audioTrack.play();
-                    });
-                } catch(e) { console.log(e); }
-            }
+                    }});
+                }} catch(e) {{ console.log(e); }}
+            }}
 
-            async function claimSeat(seatId) {
+            async function claimSeat(seatId) {{
                 if (seatsData[seatId].active) return;
-                if (currentSeat) seatsData[currentSeat] = { name: "ባዶ መቀመጫ", active: false, muted: false };
+                if (currentSeat) seatsData[currentSeat] = {{ name: "ባዶ መቀመጫ", active: false, muted: false }};
                 currentSeat = seatId;
-                seatsData[seatId] = { name: myUsername + " (እርስዎ)", active: true, muted: false };
+                seatsData[seatId] = {{ name: myUsername + " (እርስዎ)", active: true, muted: false }};
                 renderSeats();
-                try {
+                try {{
                     await client.setClientRole("host");
                     if (!localAudioTrack) localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
                     await client.publish([localAudioTrack]);
-                } catch (err) { console.error(err); }
-            }
+                }} catch (err) {{ console.error(err); }}
+            }}
 
-            function requestSeatAuto() {
-                for (let i = 1; i <= 6; i++) { if (!seatsData[i].active) { claimSeat(i); break; } }
-            }
+            function requestSeatAuto() {{
+                for (let i = 1; i <= 6; i++) {{ if (!seatsData[i].active) {{ claimSeat(i); break; }} }}
+            }}
 
-            async function toggleMic() {
+            async function toggleMic() {{
                 if (!localAudioTrack) return;
                 const btn = document.getElementById("mic-toggle-btn");
-                if (localAudioTrack.muted) {
+                if (localAudioTrack.muted) {{
                     await localAudioTrack.setMuted(false); btn.innerText = "🔊"; seatsData[currentSeat].muted = false;
-                } else {
+                }} else {{
                     await localAudioTrack.setMuted(true); btn.innerText = "🔇"; seatsData[currentSeat].muted = true;
-                }
+                }}
                 renderSeats();
-            }
+            }}
 
-            function toggleGiftDrawer() { document.getElementById("gift-panel").classList.toggle("open"); }
+            function toggleGiftDrawer() {{ document.getElementById("gift-panel").classList.toggle("open"); }}
             
-            function appendChat(user, msg, className = "") {
+            function appendChat(user, msg, className = "") {{
                 const box = document.getElementById("chat-box");
                 const div = document.createElement("div"); div.className = className;
-                div.innerHTML = `<b>${user}:</b> ${msg}`; box.appendChild(div);
+                div.innerHTML = `<b>${{user}}:</b> ${{msg}}`; box.appendChild(div);
                 box.scrollTop = box.scrollHeight;
-            }
+            }}
 
             renderSeats(); renderGifts(); initAgora();
         </script>
@@ -304,65 +312,3 @@ async def get_index():
     </html>
     """
     return HTMLResponse(content=html_content)
-
-@app.post("/api/upload-receipt")
-async def upload_receipt(
-    file: UploadFile = File(...),
-    sender: str = Form(...),
-    receiver: str = Form(...),
-    gift_name: str = Form(...),
-    amount: float = Form(...)
-):
-    # ⚠️ ቶክን ካልተቀየረ በቀጥታ ስኬታማ እንዲል ማድረግ
-    if TELEGRAM_BOT_TOKEN == "YOUR_BOT_TOKEN_HERE":
-        return {"status": "success"}
-
-    try:
-        caption_text = f"📩 <b>አዲስ የቴሌብር ደረሰኝ ደርሷል!</b>\n\n👤 <b>ላኪ:</b> {sender}\n🎯 <b>ለማን:</b> {receiver}\n🎁 <b>ስጦታ:</b> {gift_name}\n💰 <b>ዋጋ:</b> {amount} ETB"
-        file_bytes = await file.read()
-        
-        # 🛠️ ለቪአይፒ ደህንነት፦ የውጭ ላይብረሪ ሳይጠቀም በፓይተን አብሮ በተሰራው urllib መላክ
-        boundary = "----WebKitFormBoundaryMelaSpace"
-        data = []
-        
-        # ጽሑፉን ማዘጋጀት
-        data.append(f"--{boundary}".encode('utf-8'))
-        data.append(f'Content-Disposition: form-data; name="chat_id"'.encode('utf-8'))
-        data.append(''.encode('utf-8'))
-        data.append(str(ADMIN_CHAT_ID).encode('utf-8'))
-        
-        data.append(f"--{boundary}".encode('utf-8'))
-        data.append(f'Content-Disposition: form-data; name="caption"'.encode('utf-8'))
-        data.append(''.encode('utf-8'))
-        data.append(caption_text.encode('utf-8'))
-        
-        data.append(f"--{boundary}".encode('utf-8'))
-        data.append(f'Content-Disposition: form-data; name="parse_mode"'.encode('utf-8'))
-        data.append(''.encode('utf-8'))
-        data.append('HTML'.encode('utf-8'))
-        
-        # ፎቶውን ማዘጋጀት
-        data.append(f"--{boundary}".encode('utf-8'))
-        data.append(f'Content-Disposition: form-data; name="photo"; filename="{file.filename}"'.encode('utf-8'))
-        data.append(f'Content-Type: {file.content_type}'.encode('utf-8'))
-        data.append(''.encode('utf-8'))
-        data.append(file_bytes)
-        
-        data.append(f"--{boundary}--".encode('utf-8'))
-        
-        body = b'\r\n'.join(data)
-        
-        telegram_url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendPhoto"
-        req = request.Request(telegram_url, data=body)
-        req.add_header('Content-Type', f'multipart/form-data; boundary={boundary}')
-        
-        with request.urlopen(req, timeout=15) as response:
-            res_data = json.loads(response.read().decode('utf-8'))
-            if res_data.get("ok"):
-                return {"status": "success"}
-                
-        return {"status": "error"}
-    except Exception as e:
-        # ምንም ቢፈጠር ሰርቨሩ እንዳይበላሽ ሁልጊዜ ስኬት መመለስ (Fail-safe)
-        print(f"ስህተት: {str(e)}")
-        return {"status": "success"}
