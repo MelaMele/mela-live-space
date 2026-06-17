@@ -43,16 +43,22 @@ async def get_index():
             .action-btn { background: #fe2c55; border: none; color: white; padding: 12px 24px; border-radius: 25px; font-weight: bold; font-size: 14px; cursor: pointer; }
             .icon-tray { display: flex; gap: 15px; }
             .icon-btn { background: rgba(255,255,255,0.1); width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; }
-            .gift-drawer { position: absolute; bottom: -100%; left: 0; width: 100%; background: #161722; border-radius: 24px 24px 0 0; padding: 20px; transition: 0.3s ease-out; z-index: 20; }
+            
+            /* Gift Drawer Styles */
+            .gift-drawer { position: absolute; bottom: -100%; left: 0; width: 100%; background: #161722; border-radius: 24px 24px 0 0; padding: 20px; transition: 0.3s ease-out; z-index: 20; box-shadow: 0 -10px 25px rgba(0,0,0,0.5); }
             .gift-drawer.open { bottom: 0; }
-            .drawer-line { width: 40px; height: 4px; background: rgba(255,255,255,0.2); border-radius: 10px; margin: 0 auto 15px auto; }
-            .target-select { display: flex; gap: 10px; margin-bottom: 15px; }
-            .target-opt { background: #2f303d; padding: 6px 15px; border-radius: 15px; font-size: 12px; cursor: pointer; }
+            .drawer-line { width: 40px; height: 4px; background: rgba(255,255,255,0.2); border-radius: 10px; margin: 0 auto 15px auto; cursor: pointer; }
+            .target-select { display: flex; gap: 10px; margin-bottom: 15px; overflow-x: auto; padding-bottom: 5px; }
+            .target-opt { background: #2f303d; padding: 6px 15px; border-radius: 15px; font-size: 12px; cursor: pointer; white-space: nowrap; }
             .target-opt.selected { border-color: #fe2c55; color: #fe2c55; font-weight: bold; border: 1px solid; }
-            .gift-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 15px; }
-            .gift-card { background: #2f303d; border-radius: 12px; padding: 12px; text-align: center; cursor: pointer; }
-            .gift-card.selected { border: 1px solid #00cd63; }
-            .gift-price { font-size: 10px; color: #00cd63; margin-top: 4px; }
+            
+            /* Gift Grid for 6 items */
+            .gift-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 15px; max-height: 180px; overflow-y: auto; }
+            .gift-card { background: #2f303d; border-radius: 12px; padding: 10px 5px; text-align: center; cursor: pointer; border: 1px solid transparent; transition: 0.2s; }
+            .gift-card.selected { border: 1px solid #00cd63; background: rgba(0, 205, 99, 0.1); }
+            .gift-icon { font-size: 22px; margin-bottom: 2px; }
+            .gift-title { font-size: 11px; font-weight: bold; }
+            .gift-price { font-size: 10px; color: #00cd63; margin-top: 2px; }
             .send-gift-btn { width: 100%; background: #00cd63; color: white; border: none; padding: 14px; border-radius: 12px; font-weight: bold; font-size: 15px; cursor: pointer; }
         </style>
     </head>
@@ -65,10 +71,9 @@ async def get_index():
             <div class="stage-area">
                 <div class="host-section">
                     <div class="host-avatar">🎙️</div>
-                    <div style="font-size:13px; font-weight:bold;">Melaku (Host)</div>
+                    <div style="font-size:13px; font-weight:bold;" id="host-label">Melaku (Host)</div>
                 </div>
-                <div class="seats-grid" id="seats-container">
-                    </div>
+                <div class="seats-grid" id="seats-container"></div>
             </div>
             <div class="chat-area" id="chat-box">
                 <div><b>ዮናስ:</b> ሰላም እንዴት ናችሁ? 🙌</div>
@@ -82,23 +87,24 @@ async def get_index():
                     <div class="icon-btn" id="mic-toggle-btn" onclick="toggleMic()">🔊</div>
                 </div>
             </div>
+            
             <div class="gift-drawer" id="gift-panel">
                 <div class="drawer-line" onclick="toggleGiftDrawer()"></div>
                 <h4 style="margin-bottom:12px; font-size:14px; color:#aaa;">🎯 ስጦታው ለሚያገኘው ሰው:</h4>
-                <div class="target-select">
-                    <div class="target-opt selected">Melaku (Host)</div>
-                    <div class="target-opt">ዮናስ</div>
+                <div class="target-select" id="target-container">
+                    <div class="target-opt selected" onclick="selectTarget('Melaku (Host)')">Melaku (Host)</div>
+                    <div class="target-opt" onclick="selectTarget('ዮናስ')">ዮናስ</div>
+                    <div class="target-opt" onclick="selectTarget('አልማዝ')">አልማዝ</div>
+                    <div class="target-opt" onclick="selectTarget('ሳሙኤል')">ሳሙኤል</div>
                 </div>
-                <div class="gift-grid">
-                    <div class="gift-card selected"><div>🌹</div><div>ሮዝ</div><div class="gift-price">5 ብር</div></div>
-                    <div class="gift-card"><div>🦁</div><div>አንበሳ</div><div class="gift-price">100 ብር</div></div>
-                </div>
+                
+                <div class="gift-grid" id="gifts-list-container">
+                    </div>
                 <button class="send-gift-btn" onclick="sendGift()">💳 በቴሌብር ገዝተህ ላክ</button>
             </div>
         </div>
 
         <script>
-            // Agora Configuration (Free Sandbox App ID for demo)
             const AGORA_APP_ID = "ea7dfdf9926d400fb8a54d31be0bd44c"; 
             const CHANNEL_NAME = "mela_party_room";
             
@@ -106,8 +112,9 @@ async def get_index():
             let localAudioTrack = null;
             let currentSeat = null;
             let myUsername = "እንግዳ_" + Math.floor(Math.random() * 1000);
+            let selectedTarget = "Melaku (Host)";
+            let selectedGiftIndex = 0;
 
-            // Mock State for 6 Seats
             let seatsData = {
                 1: { name: "ዮናስ", active: true, muted: false },
                 2: { name: "አልማዝ", active: true, muted: false },
@@ -117,6 +124,16 @@ async def get_index():
                 6: { name: "ባዶ መቀመጫ", active: false, muted: false }
             };
 
+            // 6 Expanded Gift Items Array
+            const giftsData = [
+                { icon: "🌹", title: "ሮዝ አበባ", price: 5 },
+                { icon: "🍬", title: "ከረሜላ", price: 10 },
+                { icon: "☕", title: "ጀበና ቡና", price: 25 },
+                { icon: "🐑", title: "የፋሲካ በግ", price: 50 },
+                { icon: "🦁", title: "አንበሳ", price: 100 },
+                { icon: "👑", title: "የንጉሥ ዘውድ", price: 250 }
+            ];
+
             function renderSeats() {
                 const container = document.getElementById("seats-container");
                 container.innerHTML = "";
@@ -124,11 +141,8 @@ async def get_index():
                     const seat = seatsData[i];
                     const node = document.createElement("div");
                     node.className = "seat-node";
-                    
                     let icon = "➕";
-                    if (seat.active) {
-                        icon = seat.muted ? "🔇" : "🔊";
-                    }
+                    if (seat.active) icon = seat.muted ? "🔇" : "🔊";
                     
                     node.innerHTML = `
                         <div class="seat-circle ${seat.active ? '' : 'empty'}" onclick="claimSeat(${i})">${icon}</div>
@@ -138,30 +152,53 @@ async def get_index():
                 }
             }
 
-            async function initAgora() {
-                // Join the voice channel as audience initially
-                await client.join(AGORA_APP_ID, CHANNEL_NAME, null, null);
-                client.on("user-published", async (user, mediaType) => {
-                    await client.subscribe(user, mediaType);
-                    if (mediaType === "audio") {
-                        user.audioTrack.play();
-                    }
+            function renderGifts() {
+                const container = document.getElementById("gifts-list-container");
+                container.innerHTML = "";
+                giftsData.forEach((gift, idx) => {
+                    const card = document.createElement("div");
+                    card.className = `gift-card ${idx === selectedGiftIndex ? 'selected' : ''}`;
+                    card.onclick = () => {
+                        selectedGiftIndex = idx;
+                        renderGifts();
+                    };
+                    card.innerHTML = `
+                        <div class="gift-icon">${gift.icon}</div>
+                        <div class="gift-title">${gift.title}</div>
+                        <div class="gift-price">${gift.price} ብር</div>
+                    `;
+                    container.appendChild(card);
                 });
             }
 
+            function selectTarget(name) {
+                selectedTarget = name;
+                const opts = document.querySelectorAll(".target-opt");
+                opts.forEach(opt => {
+                    if(opt.innerText === name) opt.classList.add("selected");
+                    else opt.classList.remove("selected");
+                });
+            }
+
+            async function initAgora() {
+                try {
+                    await client.join(AGORA_APP_ID, CHANNEL_NAME, null, null);
+                    client.on("user-published", async (user, mediaType) => {
+                        await client.subscribe(user, mediaType);
+                        if (mediaType === "audio") user.audioTrack.play();
+                    });
+                } catch(e) { console.log("Agora Init Error", e); }
+            }
+
             async function claimSeat(seatId) {
-                if (seatsData[seatId].active) return; // Stated seat is taken
-                
-                // If user already occupies another seat, clear it
+                if (seatsData[seatId].active) return;
                 if (currentSeat) {
                     seatsData[currentSeat] = { name: "ባዶ መቀመጫ", active: false, muted: false };
                 }
-
                 currentSeat = seatId;
                 seatsData[seatId] = { name: myUsername + " (እርስዎ)", active: true, muted: false };
                 renderSeats();
 
-                // Turn on Microphone and Stream Audio via Agora
                 try {
                     await client.setClientRole("host");
                     if (!localAudioTrack) {
@@ -169,17 +206,12 @@ async def get_index():
                     }
                     await client.publish([localAudioTrack]);
                     appendChat("ሲስተም", "ማይክራፎንዎ በርቷል፤ መናገር ይችላሉ!", "chat-system");
-                } catch (err) {
-                    console.error("Microphone Access Denied", err);
-                }
+                } catch (err) { console.error(err); }
             }
 
             function requestSeatAuto() {
                 for (let i = 1; i <= 6; i++) {
-                    if (!seatsData[i].active) {
-                        claimSeat(i);
-                        break;
-                    }
+                    if (!seatsData[i].active) { claimSeat(i); break; }
                 }
             }
 
@@ -201,7 +233,8 @@ async def get_index():
             function toggleGiftDrawer() { document.getElementById("gift-panel").classList.toggle("open"); }
             
             function sendGift() {
-                appendChat(myUsername, "🎁 ለ Melaku '🌹 ሮዝ' በስጦታ ሰጠ!", "chat-system");
+                const gift = giftsData[selectedGiftIndex];
+                appendChat(myUsername, `🎁 ለ ${selectedTarget} "${gift.icon} ${gift.title}" በስጦታ ሰጠ!`, "chat-system");
                 toggleGiftDrawer();
             }
 
@@ -214,8 +247,8 @@ async def get_index():
                 box.scrollTop = box.scrollHeight;
             }
 
-            // Initialize on Load
             renderSeats();
+            renderGifts();
             initAgora();
         </script>
     </body>
