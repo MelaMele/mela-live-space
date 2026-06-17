@@ -2,7 +2,7 @@ import os
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
 
-app = FastAPI(title="Mela Space - Ultimate Audio Edition")
+app = FastAPI(title="Mela Space - Fixed Audio Edition")
 
 # 📱 የአንተ መረጃ
 MY_TELEBIRR_NUMBER = "0913064239"  
@@ -26,7 +26,7 @@ async def get_index():
             * {{ box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }}
             body, html {{ width: 100%; height: 100%; overflow: hidden; background: #060713; color: #fff; }}
             
-            /* ✨ Ambient Neon Glows */
+            /* ✨ Neon Glows */
             .bg-glow {{ position: absolute; width: 300px; height: 300px; background: radial-gradient(circle, rgba(37,244,238,0.15) 0%, rgba(0,0,0,0) 70%); top: -50px; left: -50px; z-index: 1; pointer-events: none; }}
             .bg-glow-right {{ position: absolute; width: 300px; height: 300px; background: radial-gradient(circle, rgba(254,44,85,0.12) 0%, rgba(0,0,0,0) 70%); bottom: 50px; right: -50px; z-index: 1; pointer-events: none; }}
 
@@ -38,7 +38,7 @@ async def get_index():
             .create-room-box {{ background: rgba(22, 23, 34, 0.7); backdrop-filter: blur(10px); border:1px solid rgba(255,255,255,0.07); border-radius:20px; padding:22px; margin-bottom:25px; box-shadow: 0 8px 32px rgba(0,0,0,0.3); z-index: 2; }}
             .input-field {{ width:100%; background: rgba(47, 48, 61, 0.6); border:1px solid rgba(255,255,255,0.1); border-radius:12px; padding:14px; color:white; font-size:14px; margin-bottom:14px; outline:none; }}
             
-            .btn-create {{ width:100%; background: linear-gradient(45deg, #fe2c55, #ff5574); border:none; color:white; padding:15px; border-radius:12px; font-weight:bold; font-size:16px; cursor:pointer; box-shadow: 0 4px 15px rgba(254,44,85,0.4); }}
+            .btn-create {{ width:100%; background: linear-gradient(45deg, #fe2c55, #ff5574); border:none; color:white; padding:15px; border-radius:12px; font-weight:bold; font-size:16px; cursor:pointer; }}
             
             .room-list-title {{ font-size:15px; color:#888; margin-bottom:15px; font-weight:bold; z-index: 2; }}
             .room-item {{ background: rgba(22, 23, 34, 0.6); border:1px solid rgba(255,255,255,0.05); padding:18px; border-radius:16px; display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; cursor:pointer; z-index: 2; }}
@@ -54,12 +54,11 @@ async def get_index():
             .live-tag {{ background: linear-gradient(45deg, #fe2c55, #ff0033); padding: 5px 14px; border-radius: 20px; font-weight: 800; font-size: 11px; }}
             .room-name-display {{ font-size:13px; font-weight:bold; color:#25f4ee; background:rgba(37,244,238,0.15); border: 1px solid rgba(37,244,238,0.2); padding:5px 14px; border-radius:20px; }}
             
-            /* 🌊 የድምፅ ሞገድ */
             .wave-container {{ width:90%; height:40px; background:rgba(0,0,0,0.4); margin: 0 auto 10px auto; display:none; border-radius:12px; overflow:hidden; border: 1px solid rgba(37,244,238,0.1); }}
             .wave-canvas {{ width:100%; height:100%; }}
 
             .stage-area {{ flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10px; z-index: 5; overflow-y: auto; }}
-            .host-section {{ text-align: center; margin-bottom: 15px; position: relative; }}
+            .host-section {{ text-align: center; margin-bottom: 15px; }}
             .host-avatar {{ width: 80px; height: 80px; border-radius: 50%; background: #111; border: 3px solid #fe2c55; display: flex; align-items: center; justify-content: center; font-size: 36px; margin: 0 auto 5px auto; box-shadow: 0 0 20px rgba(254,44,85,0.4); }}
 
             .seats-grid {{ display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; width: 100%; max-width: 360px; margin-bottom: 10px; }}
@@ -67,16 +66,16 @@ async def get_index():
             .seat-circle.empty {{ border-color: rgba(255,255,255,0.15); background: rgba(255,255,255,0.03); color: #555; }}
             .seat-name {{ font-size: 11px; color: #bbb; text-align:center; }}
             
-            /* 🎛️ Soundboard & Music Control Panel */
-            .utility-bar {{ display: flex; flex-direction: column; gap: 8px; width: 100%; background: rgba(255,255,255,0.02); padding: 10px; border-top: 1px solid rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.05); z-index: 10; }}
+            /* 🎛️ Soundboard & Control Panel */
+            .utility-bar {{ display: flex; flex-direction: column; gap: 12px; width: 100%; background: rgba(255,255,255,0.02); padding: 12px; border-top: 1px solid rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.05); z-index: 10; }}
             .button-row {{ display: flex; justify-content: space-around; width: 100%; }}
-            .util-btn {{ background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 6px 12px; border-radius: 15px; font-size: 11px; font-weight: bold; cursor: pointer; }}
+            .util-btn {{ background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 6px 14px; border-radius: 15px; font-size: 11px; font-weight: bold; cursor: pointer; }}
             .util-btn:active {{ background: #25f4ee; color: #000; }}
             
-            /* 🎵 የሙዚቃ ድምፅ መቆጣጠሪያ (Slider) ስታይል */
+            /* 🎵 Volume Slider */
             .volume-control-box {{ display: flex; align-items: center; justify-content: center; gap: 10px; width: 90%; margin: 0 auto; font-size: 11px; color: #aaa; }}
-            .volume-slider {{ flex: 1; -webkit-appearance: none; background: rgba(255,255,255,0.1); height: 4px; border-radius: 2px; outline: none; }}
-            .volume-slider::-webkit-slider-thumb {{ -webkit-appearance: none; appearance: none; width: 12px; height: 12px; border-radius: 50%; background: #25f4ee; cursor: pointer; box-shadow: 0 0 8px #25f4ee; }}
+            .volume-slider {{ flex: 1; -webkit-appearance: none; background: rgba(255,255,255,0.1); height: 6px; border-radius: 3px; outline: none; }}
+            .volume-slider::-webkit-slider-thumb {{ -webkit-appearance: none; appearance: none; width: 14px; height: 14px; border-radius: 50%; background: #25f4ee; cursor: pointer; }}
 
             /* 💬 የላይቭ ቻት ክልል */
             .chat-area {{ height: 120px; width: 100%; padding: 12px; background: linear-gradient(transparent, rgba(6,7,19,0.98)); overflow-y: auto; font-size: 12px; display: flex; flex-direction: column; gap: 5px; z-index: 10; }}
@@ -100,7 +99,7 @@ async def get_index():
             .gift-card {{ background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.05); border-radius:16px; padding:12px 5px; text-align:center; cursor:pointer; }}
             .gift-emoji {{ font-size:30px; margin-bottom:5px; }}
 
-            /* 🎬 ሲኒማቲክ የስጦታ አኒሜሽን ማሳያ */
+            /* 🎬 ሲኒማቲክ የስጦታ አኒሜሽን */
             .cinematic-stage {{ display:none; position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:2500; align-items:center; justify-content:center; }}
             .big-gift-anim {{ font-size:120px; animation: cinematicBlast 1.5s forwards cubic-bezier(0.175, 0.885, 0.32, 1.275); }}
             @keyframes cinematicBlast {{
@@ -116,14 +115,14 @@ async def get_index():
         <div class="bg-glow"></div>
         <div class="bg-glow-right"></div>
 
-        <audio id="bg-kirar-audio" loop crossOrigin="anonymous">
+        <audio id="bg-kirar-audio" loop>
             <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mp3">
         </audio>
-        <audio id="snd-applause" crossOrigin="anonymous">
-            <source src="https://assets.mixkit.co/active_storage/sfx/2012/2012-84.wav" type="audio/wav">
+        <audio id="snd-applause">
+            <source src="https://www.soundjay.com/human/sounds/applause-01.mp3" type="audio/mp3">
         </audio>
-        <audio id="snd-laughter" crossOrigin="anonymous">
-            <source src="https://assets.mixkit.co/active_storage/sfx/2816/2816-84.wav" type="audio/wav">
+        <audio id="snd-laughter">
+            <source src="https://www.soundjay.com/human/sounds/laughter-01.mp3" type="audio/mp3">
         </audio>
 
         <div class="bottom-nav" id="main-nav-bar">
@@ -152,34 +151,17 @@ async def get_index():
 
             <div class="room-list-title">🟢 የቀጥታ ውይይት ክፍሎች</div>
             <div id="active-rooms-list">
-                <div class="room-item" style="padding:18px; display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; cursor:pointer;" onclick="joinExistingRoom('🌍 የስደት ወግ (Diaspora Lounge)')">
+                <div class="room-item" onclick="joinExistingRoom('🌍 የስደት ወግ (Diaspora Lounge)')">
                     <div>
                         <div style="font-weight:bold; color:#ffdd67; font-size:15px;">🌍 የስደት ወግ (Diaspora Lounge) ⭐</div>
                         <div style="font-size:12px; color:#aaa; margin-top:3px;">በአረብ ሀገር ያሉ እህት ወንድሞች የናፍቆትና የህይወት ወግ መጋሪያ</div>
                     </div>
                     <div style="color:#25f4ee; font-size:12px; font-weight:bold; background:rgba(37,244,238,0.1); padding:6px 12px; border-radius:12px;">🎙️ ግባ</div>
                 </div>
-
-                <div class="room-item" style="padding:18px; display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; cursor:pointer;" onclick="joinExistingRoom('⚽ የኳስ ሜዳ (Football Fan Zone)')">
+                <div class="room-item" onclick="joinExistingRoom('⚽ የኳስ ሜዳ (Football Fan Zone)')">
                     <div>
                         <div style="font-weight:bold; color:#00ff7f; font-size:15px;">⚽ የኳስ ሜዳ (Football Fan Zone) 🔥</div>
                         <div style="font-size:12px; color:#aaa; margin-top:3px;">የእግር ኳስ ጨዋታዎች፣ ትንታኔዎች እና የደጋፊዎች ሙቅ ክርክር</div>
-                    </div>
-                    <div style="color:#25f4ee; font-size:12px; font-weight:bold; background:rgba(37,244,238,0.1); padding:6px 12px; border-radius:12px;">🎙️ ግባ</div>
-                </div>
-
-                <div class="room-item" style="padding:18px; display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; cursor:pointer;" onclick="joinExistingRoom('👵 የእናቶች ወግ (Mela Lounge)')">
-                    <div>
-                        <div style="font-weight:bold; color:#fff; font-size:15px;">👵 የእናቶች ወግ (Mela Lounge)</div>
-                        <div style="font-size:12px; color:#888; margin-top:3px;">የባህል ወጎች፣ ምክሮች እና ማህበራዊ ጨዋታዎች</div>
-                    </div>
-                    <div style="color:#25f4ee; font-size:12px; font-weight:bold; background:rgba(37,244,238,0.1); padding:6px 12px; border-radius:12px;">🎙️ ግባ</div>
-                </div>
-
-                <div class="room-item" style="padding:18px; display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; cursor:pointer;" onclick="joinExistingRoom('📚 የተማሪዎች መወያያ (Mela Room)')">
-                    <div>
-                        <div style="font-weight:bold; color:#fff; font-size:15px;">📚 የተማሪዎች መወያያ (Mela Room)</div>
-                        <div style="font-size:12px; color:#888; margin-top:3px;">ለትምህርት፣ ለዕውቀት እና ለክህሎት ማሳደጊያ ውይይት</div>
                     </div>
                     <div style="color:#25f4ee; font-size:12px; font-weight:bold; background:rgba(37,244,238,0.1); padding:6px 12px; border-radius:12px;">🎙️ ግባ</div>
                 </div>
@@ -191,11 +173,24 @@ async def get_index():
             <div class="info-card">
                 <div style="font-size:14px; color:#888;">የአሁኑ የኮይን ባላንስዎ</div>
                 <div style="font-size:38px; font-weight:900; color:#00cd63; margin:10px 0;">🪙 <span id="wallet-coin-balance">350</span></div>
+                <div style="font-size:12px; color:#aaa; line-height:1.6;">
+                    <b>የአካውንት ባለቤት፦</b> {MY_NAME}<br>
+                    <b>የቴሌብር ቁጥር፦</b> {MY_TELEBIRR_NUMBER}
+                </div>
             </div>
+            <button class="btn-create" style="background: linear-gradient(45deg, #00cd63, #00ff7f); width:100%;" onclick="alert('በቴሌብር ብር በመክፈል ኮይን መግዣ ሲስተም በቅርቡ ይበራል።')">💳 በቴሌብር ኮይን ግዛ (Top Up)</button>
         </div>
 
         <div class="tab-screen" id="referral-screen">
-            <div class="page-title">Refer & Earn</div>
+            <div class="page-title">ጋብዘው ይክበሩ (Refer & Earn)</div>
+            <div class="info-card">
+                <h3 style="color:#ffdd67; margin-bottom:12px;">🎉 ለእያንዳንዱ ሰው 20 ነፃ ኮይን!</h3>
+                <p style="font-size:13px; color:#ccc; margin-bottom:15px; line-height:1.5;">የእርስዎን መለያ ሊንክ ለጓደኞችዎ ያጋሩ፤ እነሱ ሊንኩን ተጠቅመው መተግበሪያውን ሲቀላቀሉ ለእርስዎ 20 ኮይን በራሱ ጊዜ ዋሌትዎ ላይ ይጨመራል።</p>
+                <div style="background:rgba(255,255,255,0.05); padding:10px; border-radius:8px; font-size:11px; color:#25f4ee; border:1px dashed rgba(37,244,238,0.3); word-break:break-all;" id="ref-link-text">
+                    https://t.me/MelaSpaceBot?start=ref_1065443252
+                </div>
+            </div>
+            <button class="btn-create" onclick="copyRefLink()">📋 ሊንኩን ኮፒ አድርግ</button>
         </div>
 
         <div class="app-container" id="room-screen">
@@ -217,8 +212,8 @@ async def get_index():
             <div class="utility-bar">
                 <div class="button-row">
                     <button class="util-btn" style="border-color:#ffdd67; color:#ffdd67;" onclick="runLuckyDraw()">🎰 Lucky Draw (10 🪙)</button>
-                    <button class="util-btn" onclick="playRealSound('applause')">👏 ጭብጨባ (ድምፅ)</button>
-                    <button class="util-btn" onclick="playRealSound('laughter')">😂 ሳቅ (ድምፅ)</button>
+                    <button class="util-btn" onclick="playRealSound('applause')">👏 ጭብጨባ</button>
+                    <button class="util-btn" onclick="playRealSound('laughter')">😂 ሳቅ</button>
                 </div>
                 
                 <div class="volume-control-box">
@@ -272,8 +267,17 @@ async def get_index():
                 document.getElementById("nav-wallet").classList.remove("active");
                 document.getElementById("nav-ref").classList.remove("active");
                 
-                if(tabName === 'home') {{ document.getElementById("lobby-screen").style.display = "flex"; document.getElementById("nav-home").classList.add("active"); }}
-                else if(tabName === 'wallet') {{ document.getElementById("wallet-screen").style.display = "block"; document.getElementById("nav-wallet").classList.add("active"); }}
+                if(tabName === 'home') {{
+                    document.getElementById("lobby-screen").style.display = "flex";
+                    document.getElementById("nav-home").classList.add("active");
+                }} else if(tabName === 'wallet') {{
+                    document.getElementById("wallet-screen").style.display = "block";
+                    document.getElementById("nav-wallet").classList.add("active");
+                    document.getElementById("wallet-coin-balance").innerText = myCoins;
+                }} else if(tabName === 'referral') {{
+                    document.getElementById("referral-screen").style.display = "block";
+                    document.getElementById("nav-ref").classList.add("active");
+                }}
             }}
 
             function createNewRoomAction() {{
@@ -294,37 +298,47 @@ async def get_index():
                 document.getElementById("lobby-screen").style.display = "none";
                 document.getElementById("room-screen").style.display = "flex";
                 document.getElementById("active-room-title").innerText = currentRoomName;
-                document.getElementById("room-host-name").innerText = currentRoomName + " (Host)";
+                document.getElementById("room-host-name").innerText = myUsername + " (Host)";
                 document.getElementById("chat-box").innerHTML = "";
                 
-                // 🎵 የጀርባ ሙዚቃን 15% አድርጎ ማስጀመር
+                // 🎵 የጀርባ ሙዚቃን በ 15% ድምፅ ማስጀመር
                 const audio = document.getElementById("bg-kirar-audio");
                 audio.volume = 0.15;
-                audio.play().catch(e => console.log("Autoplay context loaded after click."));
+                document.getElementById("kirar-vol-slider").value = 15;
+                audio.play().catch(e => console.log("Audio waiting for interaction."));
 
                 appendChat("🚀 Mela System", ` ወደ "${{currentRoomName}}" ክፍል በሰላም መጡ!`, "color:#25f4ee; font-weight:bold;");
                 renderSeats();
                 initAgora(currentRoomName);
             }}
 
-            // 🔊 የጀርባ ሙዚቃ መጠን መቆጣጠሪያ ፈንክሽን
+            // 🔊 የድምፅ መጠን መቆጣጠሪያ (Fixed!)
             function adjustMusicVolume(value) {{
                 const audio = document.getElementById("bg-kirar-audio");
                 audio.volume = value / 100;
             }}
 
-            // 🔥🔊 እውነተኛ የሳቅ እና የጭብጨባ ኦዲዮ ማጫወቻ ፈንክሽን (Fixed!)
+            // 👏😂 እውነተኛ የድምፅ ማጫወቻ (Fixed!)
             function playRealSound(type) {{
                 try {{
                     const soundEl = document.getElementById(type === 'applause' ? 'snd-applause' : 'snd-laughter');
-                    soundEl.currentTime = 0; 
-                    soundEl.volume = 0.8; // የኢፌክቱ ድምፅ ጎላ ብሎ እንዲሰማ
-                    soundEl.play();
+                    soundEl.currentTime = 0;
+                    soundEl.volume = 1.0; 
+                    soundEl.play().catch(e => console.error("Playback restriction: ", e));
                     
-                    appendChat("🎙️ Soundboard", ` [${{myUsername}}] የ${{type === 'applause'?'የጭብጨባ 👏':'የሳቅ 😂'}} እውነተኛ ድምፅ ለቋል!`, "color:#25f4ee; font-size:12px; font-weight:bold;");
+                    appendChat("🎙️ Soundboard", ` [${{myUsername}}] የ${{type === 'applause'?'ጭብጨባ 👏':'ሳቅ 😂'}} ድምፅ ተጠቅመዋል!`, "color:#25f4ee; font-weight:bold;");
                 }} catch (err) {{
-                    console.error("Audio playback error: ", err);
+                    console.log("Audio Error: ", err);
                 }}
+            }}
+
+            function copyRefLink() {{
+                const linkText = document.getElementById("ref-link-text").innerText.trim();
+                navigator.clipboard.writeText(linkText).then(() => {{
+                    alert("የሪፈራል ሊንክዎ በትክክል ኮፒ ሆኗል! ለጓደኞችዎ ያጋሩት።");
+                }}).catch(() => {{
+                    alert("ኮፒ ማድረግ አልተቻለም፣ እባክዎ ሊንኩን ተጭነው ይቅዱት።");
+                }});
             }}
 
             function sendTextMessage() {{
@@ -337,17 +351,17 @@ async def get_index():
 
             function runLuckyDraw() {{
                 if(myCoins < 10) {{ alert("ለቲኬት የሚሆን በቂ ኮይን የለዎትም!"); return; }}
-                myCoins -= 10; document.getElementById("wallet-coin-balance").innerText = myCoins;
+                myCoins -= 10;
                 appendChat("🎰 ሎተሪ", `[${{myUsername}}] የዕድል ቁጥር ቲኬት ገዝተዋል። እጣው እየወጣ ነው...`, "color:#ffdd67;");
                 
                 setTimeout(() => {{
-                    const win = Math.random() > 0.5;
+                    const win = Math.random() > 0.4;
                     if(win) {{
-                        myCoins += 50; document.getElementById("wallet-coin-balance").innerText = myCoins;
+                        myCoins += 50;
                         appendChat("🎉 ጃክፖት", ` [${{myUsername}}] የእድል ቁጥር እጣው ደርሶዎት 50 ኮይን አሸንፈዋል!`, "color:#00cd63; font-weight:bold;");
                         playRealSound('applause');
                     }} else {{
-                        appendChat("🎰 ሎተሪ", `ይቅርታ እጣው አልደረሶትም።`, "color:#888;");
+                        appendChat("🎰 ሎተሪ", `ይቅርታ እጣው አልደረሶትም። በድጋሚ ይሞክሩ!`, "color:#888;");
                     }}
                 }}, 2000);
             }}
@@ -357,7 +371,7 @@ async def get_index():
 
             function processGiftSend(giftName, price, emoji) {{
                 if (myCoins < price) {{ alert(`ይቅርታ! ባላንስዎ በቂ አይደለም።`); closeGiftTray(); return; }}
-                myCoins -= price; document.getElementById("wallet-coin-balance").innerText = myCoins;
+                myCoins -= price;
                 closeGiftTray();
                 const stage = document.getElementById("animation-stage-layer");
                 const emojiEl = document.getElementById("big-gift-emoji-element");
