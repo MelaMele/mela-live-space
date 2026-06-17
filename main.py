@@ -2,15 +2,15 @@ import os
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
 
-app = FastAPI(title="Mela Space Final Pure Frontend Telegram Send")
+app = FastAPI(title="Mela Space - Live Verification System")
 
 # 📱 የአንተ መረጃ
 MY_TELEBIRR_NUMBER = "0913064239"  
 MY_NAME = "Melaku Mebrate"         
 
-# 🤖 የደረሰኙ ፎቶ በቀጥታ ወደ ቴሌግራምህ እንዲመጣ (እነዚህን መረጃዎች በትክክል አስገባ)
-TELEGRAM_BOT_TOKEN = "8327536456:AAHn6AqMUIayCjUUTF5up8cICR_4BvjbiKs"  # የቦትህ ቶክን እዚህ አስገባ
-ADMIN_CHAT_ID = "1065443252"               # ያንተ የቴሌግራም መለያ ቁጥር (Chat ID)
+# 🤖 የቴሌግራም መረጃህ (በቀጥታ ገብቷል)
+TELEGRAM_BOT_TOKEN = "8327536456:AAHn6AqMUIayCjUUTF5up8cICR_4BvjbiKs"  
+ADMIN_CHAT_ID = "1065443252"               
 
 @app.get("/", response_class=HTMLResponse)
 async def get_index():
@@ -97,7 +97,7 @@ async def get_index():
         <div class="app-container">
             <div class="top-bar">
                 <div class="live-tag">🔴 LIVE • የቡድን ስርጭት</div>
-                <div class="coin-badge">🪙 150 Mela</div>
+                <div class="coin-badge">🪙 <span id="mela-coins-balance">150</span> Mela</div>
             </div>
             <div class="stage-area">
                 <div class="host-section">
@@ -145,6 +145,11 @@ async def get_index():
             let myUsername = "እንግዳ_" + Math.floor(Math.random() * 1000);
             let selectedTarget = "Melaku (Host)";
             let selectedGiftIndex = 0;
+            let myCoins = 150;
+
+            // ለክትትል የሚረዱ ቫሪያብሎች
+            let currentTransactionId = null;
+            let lastUpdateId = 0;
 
             let seatsData = {{
                 1: {{ name: "ዮናስ", active: true, muted: false }},
@@ -225,18 +230,27 @@ async def get_index():
                 const gift = giftsData[selectedGiftIndex];
                 
                 if (fileInput.files.length === 0) return;
-                if (TELEGRAM_BOT_TOKEN.includes("YOUR_BOT_TOKEN")) {{
-                    closePaymentModal();
-                    appendChat(myUsername, `📸 የ "${{gift.icon}} ${{gift.title}}" የክፍያ ደረሰኝ ሰቅሏል (Demo Mode)⏳`, "chat-system");
-                    return;
-                }}
 
-                const captionText = `📩 <b>አዲስ የቴሌብር ደረሰኝ ደርሷል!</b>\\n\\n👤 <b>ላኪ:</b> ${{myUsername}}\\n🎯 <b>ለማን:</b> ${{selectedTarget}}\\n🎁 <b>ስጦታ:</b> ${{gift.icon}} ${{gift.title}}\\n💰 <b>ዋጋ:</b> ${{gift.price}} ETB`;
+                // ለእያንዳንዱ ክፍያ መለያ ቁጥር መፍጠር
+                currentTransactionId = "TXN_" + Math.floor(Math.random() * 100000);
+
+                // ቴሌግራም ላይ የሚቀመጡት Inline ቁልፎች (Buttons)
+                const replyMarkup = {{
+                    inline_keyboard: [
+                        [
+                            {{ text: "✅ አጽድቅ (Approve)", callback_data: `APPROVE_${{currentTransactionId}}_${{gift.price}}` }},
+                            {{ text: "❌ ውድቅ አድርግ (Decline)", callback_data: `DECLINE_${{currentTransactionId}}` }}
+                        ]
+                    ]
+                }};
+
+                const captionText = `📩 <b>አዲስ የቴሌብር ደረሰኝ ደርሷል!</b>\\n\\n👤 <b>ላኪ:</b> ${{myUsername}}\\n🎯 <b>ለማን:</b> ${{selectedTarget}}\\n🎁 <b>ስጦታ:</b> ${{gift.icon}} ${{gift.title}}\\n💰 <b>ዋጋ:</b> ${{gift.price}} ETB\\n🆔 <b>መለያ:</b> ${{currentTransactionId}}`;
 
                 const formData = new FormData();
                 formData.append("chat_id", ADMIN_CHAT_ID);
                 formData.append("caption", captionText);
                 formData.append("parse_mode", "HTML");
+                formData.append("reply_markup", JSON.stringify(replyMarkup));
                 formData.append("photo", fileInput.files[0]);
 
                 try {{
@@ -250,13 +264,70 @@ async def get_index():
                     const data = await response.json();
                     
                     if (data.ok) {{
-                        appendChat(myUsername, `✅ የ "${{gift.icon}} ${{gift.title}}" የክፍያ ደረሰኝ በተሳካ ሁኔታ ተልኳል! በአስተዳዳሪው እየተረጋገጠ ነው...⏳`, "chat-system");
+                        appendChat(myUsername, `⏳ የክፍያ ደረሰኝ ተልኳል። በአስተዳዳሪው (Melaku) እየተረጋገጠ ነው... እባክዎ ገጹን ሳይዘጉ ይጠብቁ!`, "chat-system");
+                        // ቦቱን መከታተል መጀመር
+                        startCheckingVerification();
                     }} else {{
-                        alert("ደረሰኙን በቦቱ በኩል መላክ አልተሳካም!");
+                        alert("ደረሰኙን መላክ አልተሳካም!");
                     }}
                 }} catch(e) {{
                     alert("የኔትወርክ ስህተት አጋጥሟል!");
                 }}
+            }}
+
+            // 🔄 አስተዳዳሪው ቁልፉን ሲነካ ከቦቱ ላይ መረጃዎችን በየሴኮንዱ የመፈለጊያ ሉፕ
+            function startCheckingVerification() {{
+                const checkInterval = setInterval(async () => {{
+                    if (!currentTransactionId) {{
+                        clearInterval(checkInterval);
+                        return;
+                    }}
+                    
+                    try {{
+                        const res = await fetch(`https://api.telegram.org/bot${{TELEGRAM_BOT_TOKEN}}/getUpdates?offset=${{lastUpdateId + 1}}&timeout=0`);
+                        const updateData = await res.json();
+                        
+                        if (updateData.ok && updateData.result.length > 0) {{
+                            for (let update of updateData.result) {{
+                                lastUpdateId = update.update_id;
+                                
+                                // አስተዳዳሪው ቁልፍ ሲነካ የሚመጣ መረጃ (Callback Query)
+                                if (update.callback_query) {{
+                                    const callbackData = update.callback_query.data;
+                                    
+                                    if (callbackData.startsWith(`APPROVE_${{currentTransactionId}}`)) {{
+                                        const parts = callbackData.split("_");
+                                        const price = parseInt(parts[parts.length - 1]);
+                                        
+                                        clearInterval(checkInterval);
+                                        currentTransactionId = null;
+                                        
+                                        // ኮይን ጨምር እና ቻት ላይ አሳይ
+                                        myCoins += price;
+                                        document.getElementById("mela-coins-balance").innerText = myCoins;
+                                        const gift = giftsData[selectedGiftIndex];
+                                        appendChat("Mela System", `🎉🎉 ማረጋገጫ ተጠናቋል! አስተዳዳሪው ክፍያዎን አጽድቋል። ${{gift.icon}} ${{gift.title}} በተሳካ ሁኔታ ተሰጥቷል!`, "chat-system");
+                                        
+                                        // ለአስተዳዳሪው መልስ መመለሻ (Answer Callback)
+                                        fetch(`https://api.telegram.org/bot${{TELEGRAM_BOT_TOKEN}}/answerCallbackQuery?callback_query_id=${{update.callback_query.id}}&text=ክፍያው ጸድቋል!`);
+                                        break;
+                                    }} 
+                                    else if (callbackData.startsWith(`DECLINE_${{currentTransactionId}}`)) {{
+                                        clearInterval(checkInterval);
+                                        currentTransactionId = null;
+                                        
+                                        appendChat("Mela System", `❌ ማሳሰቢያ፡ የላኩት ደረሰኝ በአስተዳዳሪው ውድቅ ተደርጓል። እባክዎ ትክክለኛ ደረሰኝ መላክዎን ያረጋግጡ።`, "chat-system");
+                                        
+                                        fetch(`https://api.telegram.org/bot${{TELEGRAM_BOT_TOKEN}}/answerCallbackQuery?callback_query_id=${{update.callback_query.id}}&text=ክፍያው ውድቅ ተደርጓል!`);
+                                        break;
+                                    }}
+                                }
+                            }}
+                        }}
+                    }} catch (err) {{
+                        console.log("Error fetching updates:", err);
+                    }}
+                }, 2000); // በየ 2 ሰከንዱ ቦቱን ይጠይቃል
             }}
 
             async function initAgora() {{
