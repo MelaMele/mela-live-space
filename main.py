@@ -10,7 +10,7 @@ MY_NAME = "Melaku Mebrate"
 
 # 🤖 የቴሌግራም መረጃህ (በቀጥታ ገብቷል)
 TELEGRAM_BOT_TOKEN = "8327536456:AAHn6AqMUIayCjUUTF5up8cICR_4BvjbiKs"  
-ADMIN_CHAT_ID = "1065443252"               
+ADMIN_CHAT_ID = "-1004455329222"               
 
 @app.get("/", response_class=HTMLResponse)
 async def get_index():
