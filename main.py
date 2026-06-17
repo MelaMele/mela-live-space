@@ -7,7 +7,7 @@ from pydantic import BaseModel
 app = FastAPI(title="Mela Space Backend with Screenshot Verification")
 
 # 📱 ያንተን እውነተኛ የቴሌብር መረጃ እዚህ ላይ አስተካክል
-MY_TELEBIRR_NUMBER = "0912345678"  # ያንተ የቴሌብር ስልክ ቁጥር
+MY_TELEBIRR_NUMBER = "0913064239"  # ያንተ የቴሌብር ስልክ ቁጥር
 MY_NAME = "Melaku Mebrate"         # በቴሌብር ላይ የሚመጣው ያንተ ሙሉ ስም
 
 @app.get("/", response_class=HTMLResponse)
