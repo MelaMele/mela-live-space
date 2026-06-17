@@ -11,7 +11,7 @@ MY_TELEBIRR_NUMBER = "0913064239"
 MY_NAME = "Melaku Mebrate"         
 
 # 🤖 የደረሰኙ ፎቶ በቀጥታ ወደ ቴሌግራምህ እንዲመጣ (የቦትህን መረጃ እዚህ አስገባ)
-TELEGRAM_BOT_TOKEN = "YOUR_BOT_TOKEN_HERE"  # የቦትህ ቶክን (ከ BotFather ያገኘኸው)
+TELEGRAM_BOT_TOKEN = "8327536456:AAHn6AqMUIayCjUUTF5up8cICR_4BvjbiKs"  # የቦትህ ቶክን (ከ BotFather ያገኘኸው)
 ADMIN_CHAT_ID = "1065443252"               # ያንተ የቴሌግራም መለያ ቁጥር (Chat ID)
 
 @app.get("/", response_class=HTMLResponse)
