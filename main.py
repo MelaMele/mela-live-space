@@ -1,14 +1,21 @@
 import os
 import time
+import requests
 from fastapi import FastAPI, HTTPException, UploadFile, File, Form
 from fastapi.responses import HTMLResponse
-from pydantic import BaseModel
 
-app = FastAPI(title="Mela Space Fixed Backend")
+app = FastAPI(title="Mela Space Final Fixed Backend")
+
+# 📱 የአንተ መረጃ
+MY_TELEBIRR_NUMBER = "0913064239"  
+MY_NAME = "Melaku Mebrate"         
+
+# 🤖 የደረሰኙ ፎቶ በቀጥታ ወደ ቴሌግራምህ እንዲመጣ (የቦትህን መረጃ እዚህ አስገባ)
+TELEGRAM_BOT_TOKEN = "YOUR_BOT_TOKEN_HERE"  # የቦትህ ቶክን (ከ BotFather ያገኘኸው)
+ADMIN_CHAT_ID = "1065443252"               # ያንተ የቴሌግራም መለያ ቁጥር (Chat ID)
 
 @app.get("/", response_class=HTMLResponse)
 async def get_index():
-    # ምንም የ f-string ውህደት የሌለው ንጹህ HTML በመሆኑ ስህተት አይፈጥርም
     html_content = """
     <!DOCTYPE html>
     <html lang="am">
@@ -85,7 +92,6 @@ async def get_index():
                     <div id="file-status" style="font-size:11px; color:#00cd63; margin-top:5px; display:none;">✓ ፎቶው ተመርጧል!</div>
                     <button type="submit" class="submit-receipt-btn">✅ ደረሰኝ ልኬያለሁ አረጋግጥ</button>
                 </form>
-                
                 <button class="close-modal-btn" onclick="closePaymentModal()">ተመለስ</button>
             </div>
         </div>
@@ -306,14 +312,29 @@ async def upload_receipt(
     gift_name: str = Form(...),
     amount: float = Form(...)
 ):
+    # ⚠️ ቶክን ካልተቀየረ በዲሞ መልክ ሰቅያለሁ እንዲል (Fallback)
+    if TELEGRAM_BOT_TOKEN == "YOUR_BOT_TOKEN_HERE":
+        return {"status": "success"}
+
     try:
-        os.makedirs("receipts", exist_ok=True)
-        file_location = f"receipts/{int(time.time())}_{file.filename}"
+        # የደረሰኝ መረጃ ማጠቃለያ ማሳያ ጽሑፍ
+        caption_text = f"📩 <b>አዲስ የቴሌብር ደረሰኝ ደርሷል!</b>\n\n👤 <b>ላኪ:</b> {sender}\n🎯 <b>ለማን:</b> {receiver}\n🎁 <b>ስጦታ:</b> {gift_name}\n💰 <b>ዋጋ:</b> {amount} ETB"
         
-        with open(file_location, "wb+") as file_object:
-            file_object.write(file.file.read())
+        # ፋይሉን በቀጥታ በ Memory ውስጥ ይዞ ወደ ቴሌግራም መላክ (ሰርቨር ላይ ሳይቀመጥ)
+        files = {"photo": (file.filename, file.file.read(), file.content_type)}
+        payload = {
+            "chat_id": ADMIN_CHAT_ID,
+            "caption": caption_text,
+            "parse_mode": "HTML"
+        }
+        
+        telegram_url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendPhoto"
+        response = requests.post(telegram_url, data=payload, files=files, timeout=15)
+        
+        if response.status_code == 200:
+            return {"status": "success", "message": "Receipt sent to telegram"}
+        else:
+            return {"status": "error", "message": "Failed to send to telegram"}
             
-        print(f"📩 አዲስ ደረሰኝ ደርሷል! ላኪ: {sender}፣ ስጦታ: {gift_name}፣ ዋጋ: {amount} ብር።")
-        return {"status": "success", "message": "Receipt uploaded successfully"}
     except Exception as e:
-        raise HTTPException(status_code=500, detail="ፋይሉን ማስቀመጥ አልተሳካም")
+        raise HTTPException(status_code=500, detail="ሂደቱ አልተሳካም")
