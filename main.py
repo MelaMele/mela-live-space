@@ -2,13 +2,13 @@ import os
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
 
-app = FastAPI(title="Mela Space - Cinematic Edition")
+app = FastAPI(title="Mela Space - Diaspora & Live Chat Edition")
 
 # 📱 የአንተ መረጃ
 MY_TELEBIRR_NUMBER = "0913064239"  
 MY_NAME = "Melaku Mebrate"         
 
-# 🤖 የቴሌግራም መረጃህ
+# 🤖 የቴሌግราม መረጃህ
 TELEGRAM_BOT_TOKEN = "8327536456:AAHn6AqMUIayCjUUTF5up8cICR_4BvjbiKs"  
 ADMIN_CHAT_ID = "1065443252"               
 
@@ -26,7 +26,7 @@ async def get_index():
             * {{ box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }}
             body, html {{ width: 100%; height: 100%; overflow: hidden; background: #060713; color: #fff; }}
             
-            /* ✨ የሲኒማቲክ የጀርባ ብርሃን (Glow Background) */
+            /* ✨ የሲኒማቲክ የጀርባ ብርሃን (Ambient Glow) */
             .bg-glow {{ position: absolute; width: 300px; height: 300px; background: radial-gradient(circle, rgba(37,244,238,0.15) 0%, rgba(0,0,0,0) 70%); top: -50px; left: -50px; z-index: 1; pointer-events: none; }}
             .bg-glow-right {{ position: absolute; width: 300px; height: 300px; background: radial-gradient(circle, rgba(254,44,85,0.12) 0%, rgba(0,0,0,0) 70%); bottom: 50px; right: -50px; z-index: 1; pointer-events: none; }}
 
@@ -63,20 +63,28 @@ async def get_index():
             .wave-container {{ width:90%; height:45px; background:rgba(0,0,0,0.4); margin: 0 auto 15px auto; display:none; border-radius:12px; overflow:hidden; border: 1px solid rgba(37,244,238,0.1); }}
             .wave-canvas {{ width:100%; height:100%; }}
 
-            .stage-area {{ flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10px; z-index: 5; }}
+            .stage-area {{ flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10px; z-index: 5; overflow-y: auto; }}
             .host-section {{ text-align: center; margin-bottom: 25px; position: relative; }}
             
-            /* 🎙️ አኒሜትድ የሆስት ኩባያ (Glowing Host Ring) */
+            /* 🎙️ አኒሜትድ የሆስት ኩባያ */
             .host-avatar {{ width: 85px; height: 85px; border-radius: 50%; background: #111; border: 3px solid #fe2c55; display: flex; align-items: center; justify-content: center; font-size: 36px; margin: 0 auto 10px auto; box-shadow: 0 0 20px rgba(254,44,85,0.4); animation: hostPulse 2s infinite ease-in-out; }}
             @keyframes hostPulse {{ 0% {{ box-shadow: 0 0 10px rgba(254,44,85,0.4); }} 50% {{ box-shadow: 0 0 25px rgba(254,44,85,0.7); }} 100% {{ box-shadow: 0 0 10px rgba(254,44,85,0.4); }} }}
 
-            .seats-grid {{ display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; width: 100%; max-width: 360px; }}
+            .seats-grid {{ display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; width: 100%; max-width: 360px; margin-bottom: 15px; }}
             .seat-circle {{ width: 58px; height: 58px; border-radius: 50%; background: #161722; border: 2px solid #25f4ee; display: flex; align-items: center; justify-content: center; font-size: 22px; margin: 0 auto 6px auto; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }}
             .seat-circle.empty {{ border-color: rgba(255,255,255,0.15); background: rgba(255,255,255,0.03); color: #555; }}
             .seat-name {{ font-size: 11px; color: #bbb; text-align:center; font-weight: 500; }}
             
-            .chat-area {{ height: 110px; padding: 15px; background: linear-gradient(transparent, rgba(6,7,19,0.95)); overflow-y: auto; font-size: 13px; display: flex; flex-direction: column; gap: 6px; z-index: 10; border-top: 1px solid rgba(255,255,255,0.03); }}
-            .bottom-controls {{ display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: #060713; z-index: 10; border-top: 1px solid rgba(255,255,255,0.05); }}
+            /* 💬 እውነተኛ የላይቭ ቻት ክልል */
+            .chat-area {{ height: 150px; width: 100%; padding: 15px; background: linear-gradient(transparent, rgba(6,7,19,0.98)); overflow-y: auto; font-size: 13px; display: flex; flex-direction: column; gap: 6px; z-index: 10; border-top: 1px solid rgba(255,255,255,0.03); }}
+            
+            /* ✍️ አዲሱ የፅሁፍ መፃፊያ ባር (Text Input Bar) */
+            .chat-input-container {{ display: flex; padding: 10px 15px; background: #0b0c1e; border-top: 1px solid rgba(255,255,255,0.05); z-index: 12; gap: 10px; align-items: center; }}
+            .chat-input {{ flex: 1; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 10px 15px; color: #fff; font-size: 13px; outline: none; transition: border 0.2s; }}
+            .chat-input:focus {{ border-color: #25f4ee; }}
+            .btn-send-text {{ background: #25f4ee; border: none; color: #060713; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; cursor: pointer; font-size: 15px; }}
+
+            .bottom-controls {{ display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; background: #060713; z-index: 10; border-top: 1px solid rgba(255,255,255,0.05); }}
             
             /* 🧭 የታችኛው ዘመናዊ ሜኑ (Bottom Nav) */
             .bottom-nav {{ position:absolute; bottom:0; left:0; width:100%; height:70px; background: rgba(22, 23, 34, 0.85); backdrop-filter: blur(15px); border-top:1px solid rgba(255,255,255,0.06); display:flex; justify-content:space-around; align-items:center; z-index:1000; box-shadow: 0 -5px 25px rgba(0,0,0,0.5); }}
@@ -85,7 +93,7 @@ async def get_index():
             .nav-icon {{ font-size:22px; margin-bottom:4px; transition: transform 0.2s; }}
             .nav-item:active .nav-icon {{ transform: scale(0.85); }}
 
-            /* 🎁 የስጦታዎች መምረጫ ፓናል (Gift Modal/Tray) */
+            /* 🎁 የስጦታዎች መምረጫ ፓናል */
             .gift-overlay {{ display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:2000; align-items:flex-end; }}
             .gift-tray {{ width:100%; background:#10111e; border-top: 2px solid rgba(255,255,255,0.1); border-radius:24px 24px 0 0; padding:20px; display:grid; grid-template-columns: repeat(4, 1fr); gap:12px; box-shadow: 0 -10px 30px rgba(0,0,0,0.5); animation: slideUp 0.3s ease-out; }}
             @keyframes slideUp {{ from {{ transform: translateY(100%); }} to {{ transform: translateY(0); }} }}
@@ -95,7 +103,7 @@ async def get_index():
             .gift-title {{ font-size:11px; color:#fff; font-weight:bold; }}
             .gift-price {{ font-size:10px; color:#00cd63; margin-top:3px; font-weight:bold; }}
 
-            /* 🎬 ሲኒማቲክ የስጦታ አኒሜሽን ማሳያ (Cinematic Overlay) */
+            /* 🎬 ሲኒማቲክ የስጦታ አኒሜሽን ማሳያ */
             .cinematic-stage {{ display:none; position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:2500; align-items:center; justify-content:center; }}
             .big-gift-anim {{ font-size:120px; animation: cinematicBlast 1.5s forwards cubic-bezier(0.175, 0.885, 0.32, 1.275); text-shadow: 0 0 5px rgba(255,255,255,0.8); }}
             @keyframes cinematicBlast {{
@@ -115,7 +123,7 @@ async def get_index():
         <div class="bottom-nav" id="main-nav-bar">
             <div class="nav-item active" id="nav-home" onclick="switchTab('home')">
                 <div class="nav-icon">🎙️</div>
-                <div>ክፍሎች</div>
+                <div>ክфሎች</div>
             </div>
             <div class="nav-item" id="nav-wallet" onclick="switchTab('wallet')">
                 <div class="nav-icon">👛</div>
@@ -141,6 +149,14 @@ async def get_index():
             <div class="room-list-title">🟢 የቀጥታ ውይይት ክፍሎች</div>
             <div id="active-rooms-list">
                 
+                <div class="room-item" onclick="joinExistingRoom('🌍 የስደት ወግ (Diaspora Lounge)')">
+                    <div>
+                        <div style="font-weight:bold; color:#ffdd67; font-size:15px;">🌍 የስደት ወግ (Diaspora Lounge) ⭐</div>
+                        <div style="font-size:12px; color:#aaa; margin-top:3px;">በአረብ ሀገር ያሉ እህት ወንድሞች የናፍቆትና የህይወት ወግ መጋሪያ</div>
+                    </div>
+                    <div style="color:#25f4ee; font-size:12px; font-weight:bold; background:rgba(37,244,238,0.1); padding:6px 12px; border-radius:12px;">🎙️ ግባ</div>
+                </div>
+
                 <div class="room-item" onclick="joinExistingRoom('👵 የእናቶች ወግ (Mela Lounge)')">
                     <div>
                         <div style="font-weight:bold; color:#fff; font-size:15px;">👵 የእናቶች ወግ (Mela Lounge)</div>
@@ -157,14 +173,6 @@ async def get_index():
                     <div style="color:#25f4ee; font-size:12px; font-weight:bold; background:rgba(37,244,238,0.1); padding:6px 12px; border-radius:12px;">🎙️ ግባ</div>
                 </div>
 
-                <div class="room-item" onclick="joinExistingRoom('⚽ የኳስ ሜዳ (Football Fan Zone)')">
-                    <div>
-                        <div style="font-weight:bold; color:#fff; font-size:15px;">⚽ የኳስ ሜዳ (Football Fan Zone)</div>
-                        <div style="font-size:12px; color:#888; margin-top:3px;">የእግር ኳስ ጨዋታዎች በቀጥታ መክረካሪያ</div>
-                    </div>
-                    <div style="color:#25f4ee; font-size:12px; font-weight:bold; background:rgba(37,244,238,0.1); padding:6px 12px; border-radius:12px;">🎙️ ግባ</div>
-                </div>
-
             </div>
         </div>
 
@@ -175,8 +183,8 @@ async def get_index():
                 <div style="font-size:38px; font-weight:900; color:#00cd63; margin:10px 0; text-shadow:0 0 15px rgba(0,205,99,0.3);">🪙 <span id="wallet-coin-balance">350</span></div>
                 <div style="font-size:12px; color:#888;">( 10 ኮይን = 1 የኢትዮጵያ ብር )</div>
             </div>
-            <button class="btn-create" style="background: linear-gradient(45deg, #00cd63, #00ff7f); margin-bottom:14px; box-shadow:0 4px 15px rgba(0,205,99,0.3);" onclick="alert('በቴሌብር ኮይን መግዣ ሲስተም በቅርቡ ይበራል።')">💳 በቴሌብር ኮይን ግዛ (Top Up)</button>
-            <button class="btn-create" style="background: linear-gradient(45deg, #25f4ee, #00bfff); color:#060713; box-shadow:0 4px 15px rgba(37,244,238,0.3);" onclick="alert('ያጠራቀሙትን ኮይን ወደ ብር ቀይረው ቴሌብርዎ ላይ የሚላክበት ሲስተም በቅርቡ ይበራል።')">💸 ኮይን ወደ ብር ቀይር (Cash Out)</button>
+            <button class="btn-create" style="background: linear-gradient(45deg, #00cd63, #00ff7f); margin-bottom:14px;" onclick="alert('በቴሌብር ኮይን መግዣ ሲስተም በቅርቡ ይበራል።')">💳 በቴሌብር ኮይን ግዛ (Top Up)</button>
+            <button class="btn-create" style="background: linear-gradient(45deg, #25f4ee, #00bfff); color:#060713;" onclick="alert('ያጠራቀሙትን ኮይን ወደ ብር ቀይረው ቴሌብርዎ ላይ የሚላክበት ሲስተም በቅርቡ ይበራል።')">💸 ኮይን ወደ ብር ቀይር (Cash Out)</button>
         </div>
 
         <div class="tab-screen" id="referral-screen">
@@ -184,7 +192,7 @@ async def get_index():
             <div class="info-card">
                 <div style="font-size:45px; margin-bottom:12px; filter:drop-shadow(0 0 10px #fe2c55);">🎁</div>
                 <h3 style="color:#fff; margin-bottom:10px; font-weight:800;">ለእያንዳንዱ ሰው 20 ነፃ ኮይን!</h3>
-                <p style="font-size:13px; color:#888; line-height:1.6; padding: 0 10px;">የእርስዎን መለያ ሊንክ ለጓደኞችዎ ያጋሩ፤ እነሱ ገጹን ሲቀላቀሉ ለእርስዎ 20 ኮይን በነፃ እንሰጣለን!</p>
+                <p style="font-size:13px; color:#888; line-height:1.6;">የእርስዎን መለያ ሊንክ ለጓደኞችዎ ያጋሩ፤ እነሱ ገጹን ሲቀላቀሉ ለእርስዎ 20 ኮይን በነፃ እንሰጣለን!</p>
             </div>
             <div class="info-card" style="text-align:left; padding:18px;">
                 <div style="font-size:12px; color:#888; margin-bottom:6px;">የእርስዎ መጋበዣ ሊንክ፦</div>
@@ -196,7 +204,7 @@ async def get_index():
         <div class="app-container" id="room-screen">
             <div class="top-bar">
                 <div class="live-tag">🔴 LIVE</div>
-                <div class="room-name-display" id="active-room-title">ክфል: ---</div>
+                <div class="room-name-display" id="active-room-title">ክፍል: ---</div>
                 <div style="font-size:13px; color:#fe2c55; cursor:pointer; font-weight:bold; background:rgba(254,44,85,0.1); padding:5px 12px; border-radius:12px;" onclick="exitRoom()">🚪 ውጣ</div>
             </div>
             
@@ -210,13 +218,19 @@ async def get_index():
                 </div>
                 <div class="seats-grid" id="seats-container"></div>
             </div>
+
             <div class="chat-area" id="chat-box"></div>
+
+            <div class="chat-input-container">
+                <input type="text" id="text-msg-input" class="chat-input" placeholder="ሀሳብዎን እዚህ ይፃፉ..." onkeypress="handleChatKeyPress(event)">
+                <button class="btn-send-text" onclick="sendTextMessage()">➔</button>
+            </div>
             
             <div class="bottom-controls">
-                <button class="action-btn" style="background: linear-gradient(45deg, #25f4ee, #00bfff); color:#060713; border:none; padding:11px 20px; border-radius:25px; font-weight:800; font-size:13px; cursor:pointer; box-shadow:0 4px 10px rgba(37,244,238,0.2);" onclick="requestSeatAuto()">🎙️ መቀመጫ ያዝ</button>
+                <button class="action-btn" style="background: linear-gradient(45deg, #25f4ee, #00bfff); color:#060713; border:none; padding:11px 18px; border-radius:25px; font-weight:800; font-size:13px; cursor:pointer;" onclick="requestSeatAuto()">🎙️ መቀመጫ ያዝ</button>
                 <div style="display:flex; align-items:center;">
-                    <button class="action-btn" style="background: linear-gradient(45deg, #fe2c55, #ff5574); padding:11px 20px; font-weight:800; font-size:13px; border-radius:25px;" onclick="openGiftTray()">🎁 ስጦታ</button>
-                    <div class="nav-icon" style="background: rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; margin-left:12px;" id="mic-toggle-btn" onclick="toggleMic()">🔊</div>
+                    <button class="action-btn" style="background: linear-gradient(45deg, #fe2c55, #ff5574); padding:11px 18px; font-weight:800; font-size:13px; border-radius:25px;" onclick="openGiftTray()">🎁 ስጦታ</button>
+                    <div class="nav-icon" style="background: rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; margin-left:10px;" id="mic-toggle-btn" onclick="toggleMic()">🔊</div>
                 </div>
             </div>
         </div>
@@ -257,7 +271,7 @@ async def get_index():
             let currentSeat = null;
             let myUsername = "እንግዳ";
             let currentRoomName = "";
-            let myCoins = 350; // የአሁኑ መነሻ ባላንስ
+            let myCoins = 350; 
             
             let audioContext = null;
             let analyser = null;
@@ -317,36 +331,47 @@ async def get_index():
                 initAgora(currentRoomName);
             }}
 
-            /* 🎁 የስጦታዎች ትሬይ መቆጣጠሪያ */
+            /* ✍️ አዲሱ የፅሁፍ መልዕክት መላኪያ ተግባር (Text Messaging Engine) */
+            function sendTextMessage() {{
+                const inputEl = document.getElementById("text-msg-input");
+                const msgText = inputEl.value.trim();
+                if(!msgText) return;
+                
+                // ቻቱ ላይ የራስህን መልዕክት ጨምር
+                appendChat(myUsername, msgText, "color: #fff; background: rgba(255,255,255,0.02); padding: 4px 8px; border-radius: 6px;");
+                inputEl.value = ""; // መፃፊያውን ባዶ አድርግ
+            }}
+
+            function handleChatKeyPress(event) {{
+                if(event.key === 'Enter') {{
+                    sendTextMessage();
+                }}
+            }}
+
             function openGiftTray() {{ document.getElementById("gift-modal-overlay").style.display = "flex"; }}
             function closeGiftTray() {{ document.getElementById("gift-modal-overlay").style.display = "none"; }}
 
-            /* 🎬 ሲኒማቲክ የስጦታ መላክ እና አኒሜሽን ህግ (Cinematic Engine) */
             function processGiftSend(giftName, price, emoji) {{
                 if (myCoins < price) {{
-                    alert(`ይቅርታ! "${{giftName}}" ለመላክ በቂ ኮይን የለዎትም። በአሁኑ ሰዓት ያለዎት 🪙 ${{myCoins}} ብቻ ነው።`);
+                    alert(`ይቅርታ! "${{giftName}}" ለመላክ በቂ ኮይን የለዎትም።`);
                     closeGiftTray();
                     return;
                 }}
                 
-                // ኮይን ቀንሰህ አሳይ
                 myCoins -= price;
                 document.getElementById("wallet-coin-balance").innerText = myCoins;
                 closeGiftTray();
 
-                // 🎬 1. ሲኒማቲክ አኒሜሽኑን ስክሪኑ መሃል ላይ አስጀምር
                 const stage = document.getElementById("animation-stage-layer");
                 const emojiEl = document.getElementById("big-gift-emoji-element");
                 
                 emojiEl.innerText = emoji;
                 stage.style.display = "flex";
 
-                // አኒሜሽኑ ካለቀ በኋላ ስቴጁን ደብቅ (ከ1.5 ሰከንድ በኋላ)
                 setTimeout(() => {{
                     stage.style.display = "none";
                 }}, 1500);
 
-                // 💬 2. ቻቱ ላይ ደምቅ ባለ ቀለም መልዕክት አስቀምጥ
                 let chatStyle = "background: rgba(254,44,85,0.08); border-left: 3px solid #fe2c55; padding:6px; border-radius:4px; font-weight:bold; color:#ff5574;";
                 if(price >= 200) {{
                     chatStyle = "background: linear-gradient(90deg, rgba(37,244,238,0.15), transparent); border-left: 3px solid #25f4ee; padding:8px; border-radius:6px; font-weight:900; color:#25f4ee; text-shadow:0 0 5px #25f4ee;";
