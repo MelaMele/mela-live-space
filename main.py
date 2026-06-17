@@ -4,14 +4,15 @@ from fastapi import FastAPI, HTTPException, UploadFile, File, Form
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 
-app = FastAPI(title="Mela Space Backend with Screenshot Verification")
+app = FastAPI(title="Mela Space Backend with Fixed Screenshot Verification")
 
-# 📱 ያንተን እውነተኛ የቴሌብር መረጃ እዚህ ላይ አስተካክል
-MY_TELEBIRR_NUMBER = "0913064239"  # ያንተ የቴሌብር ስልክ ቁጥር
-MY_NAME = "Melaku Mebrate"         # በቴሌብር ላይ የሚመጣው ያንተ ሙሉ ስም
+# 📱 ያንተ እውነተኛ የቴሌብር መረጃ እዚህ ላይ ተስተካክሏል
+MY_TELEBIRR_NUMBER = "0913064239"  
+MY_NAME = "Melaku Mebrate"         
 
 @app.get("/", response_class=HTMLResponse)
 async def get_index():
+    # በ Python f-string ውስጥ የ CSS እና JS ቅንፎች እንዳይጋጩ በ {{ }} ተካተዋል
     html_content = f"""
     <!DOCTYPE html>
     <html lang="am">
@@ -21,7 +22,7 @@ async def get_index():
         <title>Mela Multi-Guest Space</title>
         <script src="https://download.agora.io/sdk/release/AgoraRTC_N-4.18.0.js"></script>
         <style>
-            * { box-sizing: border-box; margin: 0; padding: 0; }
+            * {{ box-sizing: border-box; margin: 0; padding: 0; }}
             body, html {{ width: 100%; height: 100%; overflow: hidden; background: #080810; font-family: sans-serif; color: #fff; }}
             .app-container {{ position: relative; width: 100%; height: 100%; display: flex; flex-direction: column; }}
             .top-bar {{ display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; }}
@@ -43,7 +44,6 @@ async def get_index():
             .icon-tray {{ display: flex; gap: 15px; }}
             .icon-btn {{ background: rgba(255,255,255,0.1); width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; }}
             
-            /* Gift Drawer Styles */
             .gift-drawer {{ position: absolute; bottom: -100%; left: 0; width: 100%; background: #161722; border-radius: 24px 24px 0 0; padding: 20px; transition: 0.3s ease-out; z-index: 20; box-shadow: 0 -10px 25px rgba(0,0,0,0.5); }}
             .gift-drawer.open {{ bottom: 0; }}
             .drawer-line {{ width: 40px; height: 4px; background: rgba(255,255,255,0.2); border-radius: 10px; margin: 0 auto 15px auto; cursor: pointer; }}
@@ -60,18 +60,16 @@ async def get_index():
             .send-gift-btn {{ width: 100%; background: #00cd63; color: white; border: none; padding: 14px; border-radius: 12px; font-weight: bold; font-size: 15px; cursor: pointer; }}
             
             /* 📸 Manual Payment Pop-up UI */
-            .payment-modal {{ display: none; position: absolute; top:0; left:0; width:100%; height:100%; background:rgba(8,8,16,0.95); z-index:100; justify-content:center; align-items:center; padding: 20px; overflow-y: auto; }}
+            .payment-modal {{ display: none; position: absolute; top:0; left:0; width:100%; height:100%; background:rgba(8,8,16,0.95); z-index:100; justify-content:center; align-items:center; padding: 20px; }}
             .modal-content {{ background: #161722; width: 100%; max-width: 360px; border-radius: 20px; padding: 20px; border: 1px solid #2f303d; text-align: center; }}
             .info-box {{ background: #2f303d; padding: 15px; border-radius: 12px; margin: 15px 0; text-align: left; font-size: 14px; line-height: 1.6; }}
             .highlight {{ color: #00cd63; font-weight: bold; font-size: 16px; }}
             .file-input-label {{ display: inline-block; width: 100%; background: #25f4ee; color: #080810; padding: 12px; border-radius: 12px; font-weight: bold; cursor: pointer; margin-top: 10px; font-size: 14px; }}
-            .file-input-label:active {{ transform: scale(0.98); }}
             .submit-receipt-btn {{ width: 100%; background: #00cd63; color: white; border: none; padding: 14px; border-radius: 12px; font-weight: bold; font-size: 15px; margin-top: 15px; cursor: pointer; }}
             .close-modal-btn {{ color: #aaa; font-size: 13px; margin-top: 15px; background: none; border: none; cursor: pointer; text-decoration: underline; }}
         </style>
     </head>
     <body>
-        <!-- 📸 Manual Payment Modal -->
         <div class="payment-modal" id="payment-popup">
             <div class="modal-content">
                 <h3 style="color:#00cd63; font-size:18px;">💸 በቴሌብር ይክፈሉ</h3>
@@ -85,7 +83,7 @@ async def get_index():
                 </div>
 
                 <form id="receipt-form" onsubmit="submitReceipt(event)">
-                    <label class="file-input-label" id="upload-label">
+                    <label class="file-input-label">
                         📸 የደረሰኝ ስክሪንሾት መምረጫ
                         <input type="file" id="receipt-file" accept="image/*" required style="display:none;" onchange="fileSelected()">
                     </label>
@@ -198,7 +196,6 @@ async def get_index():
                 }});
             }
 
-            // 📸 የክፍያ ሞዳል መቆጣጠሪያዎች
             function openPaymentModal() {{
                 const gift = giftsData[selectedGiftIndex];
                 document.getElementById("modal-amount").innerText = gift.price;
@@ -220,7 +217,6 @@ async def get_index():
                 }}
             }}
 
-            // 📤 የደረሰኝ ፎቶውን ወደ ባክኤንድ መላክ
             async function submitReceipt(event) {{
                 event.preventDefault();
                 const fileInput = document.getElementById("receipt-file");
@@ -307,7 +303,6 @@ async def get_index():
     """
     return HTMLResponse(content=html_content)
 
-# 3. የደረሰኝ ፎቶ መቀበያ እና በሰርቨር ላይ ማስቀመጫ ኤንድፖይንት (Receipt Upload Endpoint)
 @app.post("/api/upload-receipt")
 async def upload_receipt(
     file: UploadFile = File(...),
@@ -317,15 +312,13 @@ async def upload_receipt(
     amount: float = Form(...)
 ):
     try:
-        # ለሙከራ ፎቶውን በሰርቨሩ 'receipts' ፎልደር ውስጥ እናስቀምጠዋለን
         os.makedirs("receipts", exist_ok=True)
         file_location = f"receipts/{int(time.time())}_{file.filename}"
         
         with open(file_location, "wb+") as file_object:
             file_object.write(file.file.read())
             
-        print(f"📩 አዲስ ደረሰኝ ደርሷል! ላኪ: {sender}፣ ስጦታ: {gift_name}፣ ዋጋ: {amount} ብር። ፋይል: {file_location}")
-        
+        print(f"📩 አዲስ ደረሰኝ ደርሷል! ላኪ: {sender}፣ ስጦታ: {gift_name}፣ ዋጋ: {amount} ብር።")
         return {"status": "success", "message": "Receipt uploaded successfully"}
     except Exception as e:
         raise HTTPException(status_code=500, detail="ፋይሉን ማስቀመጥ አልተሳካም")
