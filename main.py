@@ -2,7 +2,7 @@ import os
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
 
-app = FastAPI(title="Mela Space - Complete Pro Platform")
+app = FastAPI(title="Mela Space - Social Live Platform")
 
 # 📱 የአንተ መረጃ
 MY_TELEBIRR_NUMBER = "0913064239"  
@@ -61,7 +61,8 @@ async def get_index():
             .seat-name {{ font-size: 11px; color: #ddd; }}
             .chat-area {{ height: 100px; padding: 15px; background: linear-gradient(transparent, rgba(0,0,0,0.8)); overflow-y: auto; font-size: 13px; display: flex; flex-direction: column; gap: 5px; }}
             .bottom-controls {{ display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: #080810; }}
-            .action-btn {{ background: #fe2c55; border: none; color: white; padding: 10px 20px; border-radius: 25px; font-weight: bold; font-size: 13px; cursor: pointer; }}
+            .action-btn {{ background: #fe2c55; border: none; color: white; padding: 10px 16px; border-radius: 25px; font-weight: bold; font-size: 12px; cursor: pointer; }}
+            .gift-btn {{ background: #00cd63; border: none; color: white; padding: 10px 16px; border-radius: 25px; font-weight: bold; font-size: 12px; cursor: pointer; margin-left: 5px; }}
             
             /* 🧭 የታችኛው ሜኑ (Bottom Navigation Bar) */
             .bottom-nav {{ position:absolute; bottom:0; left:0; width:100%; height:65px; background:#161722; border-top:1px solid #2f303d; display:flex; justify-content:space-around; align-items:center; z-index:1000; }}
@@ -100,13 +101,23 @@ async def get_index():
 
             <div class="room-list-title">🟢 የቀጥታ ውይይት ክፍሎች</div>
             <div id="active-rooms-list">
-                <div class="room-item" onclick="joinExistingRoom('☕ የጀበና ቡና ወግ (Mela Lounge)')">
+                
+                <div class="room-item" onclick="joinExistingRoom('👵 የእናቶች ወግ (Mela Lounge)')">
                     <div>
-                        <div style="font-weight:bold; color:#fff;">☕ የጀበና ቡና ወግ (Mela Lounge)</div>
-                        <div style="font-size:12px; color:#aaa; margin-top:2px;">ስለ እለታዊ ወጋወጎች እና ጨዋታዎች</div>
+                        <div style="font-weight:bold; color:#fff;">👵 የእናቶች ወግ (Mela Lounge)</div>
+                        <div style="font-size:12px; color:#aaa; margin-top:2px;">የባህል ወጎች፣ ምክሮች እና ማህበራዊ ጨዋታዎች</div>
                     </div>
                     <div style="color:#25f4ee; font-size:12px; font-weight:bold;">🎙️ ግባ</div>
                 </div>
+
+                <div class="room-item" onclick="joinExistingRoom('📚 የተማሪዎች መወያያ (Mela Room)')">
+                    <div>
+                        <div style="font-weight:bold; color:#fff;">📚 የተማሪዎች መወያያ (Mela Room)</div>
+                        <div style="font-size:12px; color:#aaa; margin-top:2px;">ለትምህርት፣ ለዕውቀት እና ለክህሎት ማሳደጊያ ውይይት</div>
+                    </div>
+                    <div style="color:#25f4ee; font-size:12px; font-weight:bold;">🎙️ ግባ</div>
+                </div>
+
                 <div class="room-item" onclick="joinExistingRoom('⚽ የኳስ ሜዳ (Football Fan Zone)')">
                     <div>
                         <div style="font-weight:bold; color:#fff;">⚽ የኳስ ሜዳ (Football Fan Zone)</div>
@@ -114,13 +125,7 @@ async def get_index():
                     </div>
                     <div style="color:#25f4ee; font-size:12px; font-weight:bold;">🎙️ ግባ</div>
                 </div>
-                <div class="room-item" onclick="joinExistingRoom('🤝 የቢዝነስ ምክክር (Business & Income)')">
-                    <div>
-                        <div style="font-weight:bold; color:#fff;">🤝 የቢዝነስ ምክክር (Business & Income)</div>
-                        <div style="font-size:12px; color:#aaa; margin-top:2px;">አዳዲስ የቢዝነስ ሀሳቦች እና የገቢ ምንጮች መፍጠሪያ</div>
-                    </div>
-                    <div style="color:#25f4ee; font-size:12px; font-weight:bold;">🎙️ ግባ</div>
-                </div>
+
             </div>
         </div>
 
@@ -140,7 +145,7 @@ async def get_index():
             <div class="info-card">
                 <div style="font-size:40px; margin-bottom:10px;">🎁</div>
                 <h3 style="color:#fff; margin-bottom:8px;">ለእያንዳንዱ ሰው 20 ነፃ ኮይን!</h3>
-                <p style="font-size:13px; color:#aaa; line-height:1.5;">የእርስዎን መለያ ሊንክ ለጓደኞችዎ ያጋሩ፤ እነሱ ገጹን ሲቀላቀሉ ለእርስዎ 20 ኮይን፣ ለጓደኛዎ ደግሞ 10 ኮይን በነፃ እንሰጣለን!</p>
+                <p style="font-size:13px; color:#aaa; line-height:1.5;">የእርስዎን መለያ ሊንክ ለጓደኞችዎ ያጋሩ፤ እነሱ ገጹን ሲቀላቀሉ ለእርስዎ 20 ኮይን በነፃ እንሰጣለን!</p>
             </div>
             <div class="info-card" style="text-align:left; padding:15px;">
                 <div style="font-size:12px; color:#aaa; margin-bottom:5px;">የእርስዎ መጋበዣ ሊንክ፦</div>
@@ -167,9 +172,13 @@ async def get_index():
                 <div class="seats-grid" id="seats-container"></div>
             </div>
             <div class="chat-area" id="chat-box"></div>
+            
             <div class="bottom-controls">
                 <button class="action-btn" onclick="requestSeatAuto()">🎙️ መቀመጫ ያዝ</button>
-                <div class="icon-tray"><div class="icon-btn" id="mic-toggle-btn" onclick="toggleMic()">🔊</div></div>
+                <div style="display:flex; align-items:center;">
+                    <button class="gift-btn" onclick="sendRoomGift()">🎁 ስጦታ ስጥ</button>
+                    <div class="icon-btn" style="background: rgba(255,255,255,0.1); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: pointer; margin-left:10px;" id="mic-toggle-btn" onclick="toggleMic()">🔊</div>
+                </div>
             </div>
         </div>
 
@@ -180,6 +189,7 @@ async def get_index():
             let currentSeat = null;
             let myUsername = "እንግዳ";
             let currentRoomName = "";
+            let myCoins = 150; // የኮይን መጠን መነሻ
             
             let audioContext = null;
             let analyser = null;
@@ -188,14 +198,11 @@ async def get_index():
 
             let seatsData = {{ 1:{{name:"ባዶ",active:false}}, 2:{{name:"ባዶ",active:false}}, 3:{{name:"ባዶ",active:false}}, 4:{{name:"ባዶ",active:false}}, 5:{{name:"ባዶ",active:false}}, 6:{{name:"ባዶ",active:false}} }};
 
-            // 🔄 የታችኛው ሜኑ ታቦችን መቀያየሪያ ተግባር
             function switchTab(tabName) {{
-                // ሁሉንም ታቦች ደብቅ
                 document.getElementById("lobby-screen").style.display = "none";
                 document.getElementById("wallet-screen").style.display = "none";
                 document.getElementById("referral-screen").style.display = "none";
                 
-                // ሁሉንም አክቲቭ ማርከር አጥፋ
                 document.getElementById("nav-home").classList.remove("active");
                 document.getElementById("nav-wallet").classList.remove("active");
                 document.getElementById("nav-ref").classList.remove("active");
@@ -226,7 +233,7 @@ async def get_index():
             }}
 
             function launchRoom() {{
-                document.getElementById("main-nav-bar").style.display = "none"; // ሩም ውስጥ ሲገባ ሜኑው ይደበቃል
+                document.getElementById("main-nav-bar").style.display = "none";
                 document.getElementById("lobby-screen").style.display = "none";
                 document.getElementById("wallet-screen").style.display = "none";
                 document.getElementById("referral-screen").style.display = "none";
@@ -235,8 +242,28 @@ async def get_index():
                 document.getElementById("active-room-title").innerText = currentRoomName;
                 document.getElementById("room-host-name").innerText = currentRoomName + " (Host)";
                 
+                // ሩም ሲጀምር መልዕክት ማሳያ
+                document.getElementById("chat-box").innerHTML = "";
+                appendChat("Mela System", ` እንኳን ወደዚህ ክፍል በሰላም መጡ!`, "color:#25f4ee; font-weight:bold;");
+                
                 renderSeats();
                 initAgora(currentRoomName);
+            }}
+
+            // 🎁 በእያንዳንዱ ክፍል ውስጥ የሚሰራው የስጦታ ተግባር (Gift System Logic)
+            function sendRoomGift() {{
+                if (myCoins < 20) {{
+                    alert("ለማቅረብ በቂ ኮይን የለዎትም! እባክዎ ዋሌትዎ ውስጥ ገብተው ይሙሉ አስፈላጊ ከሆነ።");
+                    return;
+                }}
+                
+                // ኮይኑን ቀንሰው
+                myCoins -= 20;
+                document.getElementById("wallet-coin-balance").innerText = myCoins;
+                
+                // ሩም ውስጥ ላለው ቻት በሙሉ አሳይ
+                appendChat("🎁 ስጦታ", `${{myUsername}} ለክፍሉ አስተናጋጅ [የአበባ እቅፍ 🌹] በ 20 ኮይን ጋብዘዋል!`, "color:#00cd63; font-weight:bold; background:rgba(0,205,99,0.1); padding:5px; border-radius:5px;");
+                alert("ስጦታዎ በተሳካ ሁኔታ ተልኳል! 🌹");
             }}
 
             async function exitRoom() {{
@@ -247,7 +274,7 @@ async def get_index():
                 for(let i=1; i<=6; i++) seatsData[i] = {{ name: "ባዶ", active: false }};
                 
                 document.getElementById("room-screen").style.display = "none";
-                document.getElementById("main-nav-bar").style.display = "flex"; // ወደ ሎቢ ሲመለስ ሜኑው ይመጣል
+                document.getElementById("main-nav-bar").style.display = "flex";
                 switchTab('home');
             }}
 
@@ -342,7 +369,15 @@ async def get_index():
             function copyRefLink() {{
                 const linkText = document.getElementById("my-ref-link").innerText;
                 navigator.clipboard.writeText(linkText);
-                alert("የሪፈራል ሊንክዎ በተሳካ ሁኔታ ኮፒ ሆኗል! ለጓደኞችዎ መላክ ይችላሉ።");
+                alert("የሪፈራል ሊንክዎ በተሳካ ሁኔታ ኮፒ ሆኗል!");
+            }}
+
+            function appendChat(user, msg, style = "") {{
+                const box = document.getElementById("chat-box");
+                const div = document.createElement("div");
+                div.style = style;
+                div.innerHTML = `<b>${{user}}:</b> ${{msg}}`; box.appendChild(div);
+                box.scrollTop = box.scrollHeight;
             }}
         </script>
     </body>
