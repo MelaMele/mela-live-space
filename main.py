@@ -2,13 +2,13 @@ import os
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
 
-app = FastAPI(title="Mela Space - Diaspora & Live Chat Edition")
+app = FastAPI(title="Mela Space - Complete Live Rooms")
 
 # 📱 የአንተ መረጃ
 MY_TELEBIRR_NUMBER = "0913064239"  
 MY_NAME = "Melaku Mebrate"         
 
-# 🤖 የቴሌግราม መረጃህ
+# 🤖 የቴሌግራም መረጃህ
 TELEGRAM_BOT_TOKEN = "8327536456:AAHn6AqMUIayCjUUTF5up8cICR_4BvjbiKs"  
 ADMIN_CHAT_ID = "1065443252"               
 
@@ -75,10 +75,10 @@ async def get_index():
             .seat-circle.empty {{ border-color: rgba(255,255,255,0.15); background: rgba(255,255,255,0.03); color: #555; }}
             .seat-name {{ font-size: 11px; color: #bbb; text-align:center; font-weight: 500; }}
             
-            /* 💬 እውነተኛ የላይቭ ቻት ክልል */
+            /* 💬 የላይቭ ቻት ክልል */
             .chat-area {{ height: 150px; width: 100%; padding: 15px; background: linear-gradient(transparent, rgba(6,7,19,0.98)); overflow-y: auto; font-size: 13px; display: flex; flex-direction: column; gap: 6px; z-index: 10; border-top: 1px solid rgba(255,255,255,0.03); }}
             
-            /* ✍️ አዲሱ የፅሁፍ መፃፊያ ባር (Text Input Bar) */
+            /* ✍️ የፅሁፍ መፃፊያ ባር (Text Input Bar) */
             .chat-input-container {{ display: flex; padding: 10px 15px; background: #0b0c1e; border-top: 1px solid rgba(255,255,255,0.05); z-index: 12; gap: 10px; align-items: center; }}
             .chat-input {{ flex: 1; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 10px 15px; color: #fff; font-size: 13px; outline: none; transition: border 0.2s; }}
             .chat-input:focus {{ border-color: #25f4ee; }}
@@ -123,7 +123,7 @@ async def get_index():
         <div class="bottom-nav" id="main-nav-bar">
             <div class="nav-item active" id="nav-home" onclick="switchTab('home')">
                 <div class="nav-icon">🎙️</div>
-                <div>ክфሎች</div>
+                <div>ክፍሎች</div>
             </div>
             <div class="nav-item" id="nav-wallet" onclick="switchTab('wallet')">
                 <div class="nav-icon">👛</div>
@@ -153,6 +153,14 @@ async def get_index():
                     <div>
                         <div style="font-weight:bold; color:#ffdd67; font-size:15px;">🌍 የስደት ወግ (Diaspora Lounge) ⭐</div>
                         <div style="font-size:12px; color:#aaa; margin-top:3px;">በአረብ ሀገር ያሉ እህት ወንድሞች የናፍቆትና የህይወት ወግ መጋሪያ</div>
+                    </div>
+                    <div style="color:#25f4ee; font-size:12px; font-weight:bold; background:rgba(37,244,238,0.1); padding:6px 12px; border-radius:12px;">🎙️ ግባ</div>
+                </div>
+
+                <div class="room-item" onclick="joinExistingRoom('⚽ የኳስ ሜዳ (Football Fan Zone)')">
+                    <div>
+                        <div style="font-weight:bold; color:#00ff7f; font-size:15px;">⚽ የኳስ ሜዳ (Football Fan Zone) 🔥</div>
+                        <div style="font-size:12px; color:#aaa; margin-top:3px;">የእግር ኳስ ጨዋታዎች፣ ትንታኔዎች እና የደጋፊዎች ሙቅ ክርክር መድረክ</div>
                     </div>
                     <div style="color:#25f4ee; font-size:12px; font-weight:bold; background:rgba(37,244,238,0.1); padding:6px 12px; border-radius:12px;">🎙️ ግባ</div>
                 </div>
@@ -331,15 +339,13 @@ async def get_index():
                 initAgora(currentRoomName);
             }}
 
-            /* ✍️ አዲሱ የፅሁፍ መልዕክት መላኪያ ተግባር (Text Messaging Engine) */
             function sendTextMessage() {{
                 const inputEl = document.getElementById("text-msg-input");
                 const msgText = inputEl.value.trim();
                 if(!msgText) return;
                 
-                // ቻቱ ላይ የራስህን መልዕክት ጨምር
                 appendChat(myUsername, msgText, "color: #fff; background: rgba(255,255,255,0.02); padding: 4px 8px; border-radius: 6px;");
-                inputEl.value = ""; // መፃፊያውን ባዶ አድርግ
+                inputEl.value = ""; 
             }}
 
             function handleChatKeyPress(event) {{
