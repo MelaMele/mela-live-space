@@ -2,7 +2,7 @@ import os
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
 
-app = FastAPI(title="Mela Space - Ultimate Pro Edition")
+app = FastAPI(title="Mela Space - Ultimate 3D Masterpiece")
 
 # 📱 ያንተ መረጃ
 MY_TELEBIRR_NUMBER = "0913064239"  
@@ -20,13 +20,13 @@ async def get_index():
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-        <title>Mela Ultimate Pro Space</title>
+        <title>Mela Space - Ultimate 3D Edition</title>
         <script src="https://download.agora.io/sdk/release/AgoraRTC_N-4.18.0.js"></script>
         <style>
-            * {{ box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }}
+            * {{ box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, sans-serif; }}
             body, html {{ width: 100%; height: 100%; overflow: hidden; background: #060713; color: #fff; }}
             
-            /* ✨ Neon Glows */
+            /* ✨ Neon Background Glows */
             .bg-glow {{ position: absolute; width: 300px; height: 300px; background: radial-gradient(circle, rgba(37,244,238,0.15) 0%, rgba(0,0,0,0) 70%); top: -50px; left: -50px; z-index: 1; pointer-events: none; }}
             .bg-glow-right {{ position: absolute; width: 300px; height: 300px; background: radial-gradient(circle, rgba(254,44,85,0.12) 0%, rgba(0,0,0,0) 70%); bottom: 50px; right: -50px; z-index: 1; pointer-events: none; }}
 
@@ -36,13 +36,41 @@ async def get_index():
             .lobby-title {{ color:#25f4ee; font-size:26px; font-weight:900; text-shadow: 0 0 20px rgba(37,244,238,0.6); }}
             
             .create-room-box {{ background: rgba(22, 23, 34, 0.7); backdrop-filter: blur(10px); border:1px solid rgba(255,255,255,0.07); border-radius:20px; padding:20px; margin-bottom:20px; box-shadow: 0 8px 32px rgba(0,0,0,0.3); z-index: 2; }}
-            .input-field {{ width:100%; background: rgba(47, 48, 61, 0.6); border:1px solid rgba(255,255,255,0.1); border-radius:12px; padding:12px; color:white; font-size:14px; margin-bottom:12px; outline:none; }}
+            .input-field {{ width:100%; background: rgba(47, 48, 61, 0.6); border:1px solid rgba(255,255,255,0.1); border-radius:12px; padding:12px; color:white; font-size:14px; margin-bottom:12px; outline:none; transition: all 0.3s; }}
+            .input-field:focus {{ border-color: #25f4ee; box-shadow: 0 0 10px rgba(37,244,238,0.3); }}
             
             .checkbox-container {{ display: flex; align-items: center; gap: 8px; margin-bottom: 12px; font-size: 13px; color: #aaa; }}
-            .btn-create {{ width:100%; background: linear-gradient(45deg, #fe2c55, #ff5574); border:none; color:white; padding:14px; border-radius:12px; font-weight:bold; font-size:16px; cursor:pointer; box-shadow: 0 4px 15px rgba(254,44,85,0.4); }}
             
+            /* 🚀 3D Animated Buttons */
+            .btn-3d {{ 
+                width:100%; 
+                background: linear-gradient(180deg, #fe2c55, #d2143a); 
+                border: none; 
+                color: white; 
+                padding: 14px; 
+                border-radius: 14px; 
+                font-weight: bold; 
+                font-size: 16px; 
+                cursor: pointer; 
+                position: relative;
+                box-shadow: 0 5px 0 #990b24, 0 8px 15px rgba(0,0,0,0.4), 0 0 15px rgba(254,44,85,0.3);
+                transition: all 0.1s ease;
+                transform: translateY(0);
+            }}
+            .btn-3d:active {{
+                transform: translateY(4px);
+                box-shadow: 0 1px 0 #990b24, 0 2px 5px rgba(0,0,0,0.4);
+            }}
+            
+            .btn-3d-green {{ 
+                background: linear-gradient(180deg, #00cd63, #009647); 
+                box-shadow: 0 5px 0 #00632f, 0 8px 15px rgba(0,0,0,0.4), 0 0 15px rgba(0,205,99,0.3); 
+            }}
+            .btn-3d-green:active {{ box-shadow: 0 1px 0 #00632f, 0 2px 5px rgba(0,0,0,0.4); }}
+
             .room-list-title {{ font-size:15px; color:#888; margin-bottom:12px; font-weight:bold; z-index: 2; }}
-            .room-item {{ background: rgba(22, 23, 34, 0.6); border:1px solid rgba(255,255,255,0.05); padding:15px; border-radius:16px; display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; cursor:pointer; z-index: 2; }}
+            .room-item {{ background: rgba(22, 23, 34, 0.6); border:1px solid rgba(255,255,255,0.05); padding:15px; border-radius:16px; display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; cursor:pointer; transition: transform 0.2s; z-index: 2; }}
+            .room-item:active {{ transform: scale(0.97); }}
 
             /* 🗂️ የታብ ገፆች */
             .tab-screen {{ display:none; position:absolute; top:0; left:0; width:100%; height:calc(100% - 70px); background:#060713; z-index:400; padding:20px; overflow-y:auto; }}
@@ -55,6 +83,9 @@ async def get_index():
             .live-tag {{ background: linear-gradient(45deg, #fe2c55, #ff0033); padding: 5px 12px; border-radius: 20px; font-weight: 800; font-size: 11px; }}
             .room-name-display {{ font-size:13px; font-weight:bold; color:#25f4ee; background:rgba(37,244,238,0.15); border: 1px solid rgba(37,244,238,0.2); padding:5px 12px; border-radius:20px; }}
             
+            /* ⏱️ ማይክ ሰዓት ቆጣሪ ቪው */
+            .time-reward-badge {{ font-size:11px; color:#ffdd67; background: rgba(255,221,103,0.1); padding: 3px 8px; border-radius: 10px; font-weight: bold; margin-top: 4px; display: none; }}
+
             .wave-container {{ width:90%; height:35px; background:rgba(0,0,0,0.4); margin: 0 auto 8px auto; display:none; border-radius:12px; overflow:hidden; border: 1px solid rgba(37,244,238,0.1); }}
             .wave-canvas {{ width:100%; height:100%; }}
 
@@ -64,19 +95,24 @@ async def get_index():
             .host-badge {{ position: absolute; top: 0; right: 12px; background: #ffdd67; color: #000; font-size: 10px; padding: 2px 6px; border-radius: 10px; font-weight: bold; }}
 
             .seats-grid {{ display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: 100%; max-width: 360px; margin-bottom: 8px; }}
-            .seat-circle {{ width: 50px; height: 50px; border-radius: 50%; background: #161722; border: 2px solid #25f4ee; display: flex; align-items: center; justify-content: center; font-size: 18px; margin: 0 auto 4px auto; cursor: pointer; position: relative; }}
-            .seat-circle.empty {{ border-color: rgba(255,255,255,0.15); background: rgba(255,255,255,0.03); color: #555; }}
+            .seat-circle {{ width: 50px; height: 50px; border-radius: 50%; background: #161722; border: 2px solid #25f4ee; display: flex; align-items: center; justify-content: center; font-size: 18px; margin: 0 auto 4px auto; cursor: pointer; position: relative; box-shadow: inset 0 0 8px rgba(37,244,238,0.2); }}
+            .seat-circle.empty {{ border-color: rgba(255,255,255,0.15); background: rgba(255,255,255,0.03); color: #555; box-shadow: none; }}
             .seat-name {{ font-size: 11px; color: #bbb; text-align:center; }}
             
-            /* 🛡️ Mod Tag */
             .mod-indicator {{ position: absolute; top: -5px; right: -5px; background: #00bfff; color: black; font-size: 8px; padding: 1px 4px; border-radius: 5px; font-weight: bold; display: none; }}
 
-            /* 🎛️ Soundboard, Games & FX Panels */
+            /* 🎛️ Control Panel Buttons with 3D Micro-style */
             .utility-bar {{ display: flex; flex-direction: column; gap: 8px; width: 100%; background: rgba(255,255,255,0.02); padding: 10px; border-top: 1px solid rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.05); z-index: 10; }}
-            .button-row {{ display: flex; justify-content: space-around; width: 100%; gap: 5px; flex-wrap: wrap; }}
-            .util-btn {{ background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 6px 8px; border-radius: 12px; font-size: 11px; font-weight: bold; cursor: pointer; flex: 1; min-width: 75px; text-align: center; }}
-            .util-btn:active {{ background: #25f4ee; color: #000; }}
+            .button-row {{ display: flex; justify-content: space-around; width: 100%; gap: 6px; flex-wrap: wrap; }}
             
+            .btn-3d-sm {{
+                background: linear-gradient(180deg, rgba(255,255,255,0.1), rgba(255,255,255,0.03));
+                border: 1px solid rgba(255,255,255,0.12);
+                color: white; padding: 7px 10px; border-radius: 10px; font-size: 11px; font-weight: bold; cursor: pointer;
+                box-shadow: 0 3px 0 rgba(0,0,0,0.3); transition: all 0.1s; text-align: center; flex: 1; min-width: 72px;
+            }}
+            .btn-3d-sm:active {{ transform: translateY(2px); box-shadow: 0 1px 0 rgba(0,0,0,0.3); }}
+
             .slider-fx-container {{ display: flex; flex-direction: column; gap: 6px; width: 95%; margin: 0 auto; }}
             .volume-control-box {{ display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 11px; color: #aaa; }}
             .volume-slider {{ flex: 1; -webkit-appearance: none; background: rgba(255,255,255,0.1); height: 5px; border-radius: 3px; outline: none; }}
@@ -91,7 +127,8 @@ async def get_index():
             /* ✍️ የፅሁፍ መፃፊያ ባር */
             .chat-input-container {{ display: flex; padding: 10px 15px; background: #0b0c1e; border-top: 1px solid rgba(255,255,255,0.05); z-index: 12; gap: 10px; align-items: center; }}
             .chat-input {{ flex: 1; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 10px 15px; color: #fff; font-size: 13px; outline: none; }}
-            .btn-send-text {{ background: #25f4ee; border: none; color: #060713; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; cursor: pointer; }}
+            .btn-send-text {{ background: #25f4ee; border: none; color: #060713; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; cursor: pointer; box-shadow: 0 3px 0 #1bcfca; transition: all 0.1s; }}
+            .btn-send-text:active {{ transform: translateY(2px); box-shadow: 0 1px 0 #1bcfca; }}
 
             .bottom-controls {{ display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; background: #060713; z-index: 10; border-top: 1px solid rgba(255,255,255,0.05); }}
             
@@ -101,15 +138,16 @@ async def get_index():
             .nav-item.active {{ color:#25f4ee; }}
             .nav-icon {{ font-size:22px; margin-bottom:4px; }}
 
-            /* 🎁 የስጦታዎች / 🎡 ዕድል ማሽከርከሪያ Overlay */
+            /* Overlays */
             .gift-overlay {{ display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:2000; align-items:flex-end; }}
             .gift-tray {{ width:100%; background:#10111e; border-top: 2px solid rgba(255,255,255,0.1); border-radius:24px 24px 0 0; padding:20px; display:grid; grid-template-columns: repeat(4, 1fr); gap:12px; }}
-            .gift-card {{ background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.05); border-radius:16px; padding:12px 5px; text-align:center; cursor:pointer; }}
+            .gift-card {{ background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.05); border-radius:16px; padding:12px 5px; text-align:center; cursor:pointer; transition: transform 0.2s; }}
+            .gift-card:active {{ transform: scale(0.9); }}
             .gift-emoji {{ font-size:30px; margin-bottom:5px; }}
 
             /* 🎡 Wheel UI */
             .wheel-box {{ width: 100%; background: #10111e; padding: 25px; border-radius: 24px 24px 0 0; text-align: center; color: white; }}
-            .wheel-graphic {{ width: 160px; height: 160px; border-radius: 50%; border: 8px solid #25f4ee; margin: 15px auto; display: flex; align-items: center; justify-content: center; font-size: 40px; font-weight: bold; background: conic-gradient(#fe2c55 0% 25%, #00ff7f 25% 50%, #00bfff 50% 75%, #ffdd67 75% 100%); transition: transform 3s cubic-bezier(0.1, 0.8, 0.1, 1); }}
+            .wheel-graphic {{ width: 160px; height: 160px; border-radius: 50%; border: 8px solid #25f4ee; margin: 15px auto; display: flex; align-items: center; justify-content: center; font-size: 40px; font-weight: bold; background: conic-gradient(#fe2c55 0% 25%, #00ff7f 25% 50%, #00bfff 50% 75%, #ffdd67 75% 100%); transition: transform 3s cubic-bezier(0.1, 0.8, 0.1, 1); box-shadow: 0 0 20px rgba(37,244,238,0.4); }}
 
             /* 🎬 ሲኒማቲክ አኒሜሽን */
             .cinematic-stage {{ display:none; position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:2500; align-items:center; justify-content:center; }}
@@ -164,8 +202,8 @@ async def get_index():
                     <input type="checkbox" id="lobby-is-vip">
                     <label for="lobby-is-vip">🔒 እንደ VIP (የግል ሚስጥራዊ ክፍል) ፍጠር</label>
                 </div>
-                <button class="btn-create" onclick="createNewRoomAction()">🚀 አዲስ ክፍል ፍጠር</button>
-                <button class="util-btn" style="width:100%; margin-top:10px; border-color:#00ff7f; color:#00ff7f;" onclick="openWheelModal()">🎡 ዕለታዊ ዕድል ማሽከርከሪያ (Daily Wheel)</button>
+                <button class="btn-3d" style="margin-bottom:12px;" onclick="createNewRoomAction()">🚀 አዲስ ክፍል ፍጠር</button>
+                <button class="btn-3d btn-3d-green" onclick="openWheelModal()">🎡 ዕለታዊ ዕድል ማሽከርከሪያ</button>
             </div>
 
             <div class="room-list-title">🟢 የቀጥታ ውይይት ክፍሎች</div>
@@ -219,7 +257,7 @@ async def get_index():
                     <div class="leader-row"><span>🥉 3. ዮናስ ካሳሁን</span><span style="color:#cd7f32;">🔥 1,450 🪙</span></div>
                 </div>
             </div>
-            <button class="btn-create" style="background: linear-gradient(45deg, #00cd63, #00ff7f); width:100%;" onclick="alert('የአውቶማቲክ ቴሌብር ሲስተም በቅርቡ ይበራል!')">💳 በቴሌብር ኮይን ግዛ</button>
+            <button class="btn-3d btn-3d-green" onclick="alert('የአውቶማቲክ ቴሌብር ሲስተም በቅርቡ ይበራል!')">💳 በቴሌብር ኮይን ግዛ</button>
         </div>
 
         <div class="tab-screen" id="referral-screen">
@@ -231,7 +269,7 @@ async def get_index():
                     https://t.me/MelaSpaceBot?start=ref_{ADMIN_CHAT_ID}
                 </div>
             </div>
-            <button class="btn-create" onclick="copyRefLink()">📋 ሊንኩን ኮፒ አድርግ</button>
+            <button class="btn-3d" onclick="copyRefLink()">📋 ሊንኩን ኮፒ አድርግ</button>
         </div>
 
         <div class="app-container" id="room-screen">
@@ -247,17 +285,18 @@ async def get_index():
                     <div class="host-avatar" id="host-crown-zone">🎙️</div>
                     <div class="host-badge">HOST</div>
                     <div style="font-size:13px; font-weight:bold; color:#fff;" id="room-host-name">---</div>
+                    <div class="time-reward-badge" id="mic-timer-badge">🎤 መድረክ ላይ፦ 0 ሰከንድ (🪙 +0)</div>
                 </div>
                 <div class="seats-grid" id="seats-container"></div>
             </div>
 
             <div class="utility-bar">
                 <div class="button-row">
-                    <button class="util-btn" style="border-color:#ffdd67; color:#ffdd67;" onclick="runLuckyDraw()">🎰 Lucky Draw</button>
-                    <button class="util-btn" style="border-color:#00ff7f; color:#00ff7f;" onclick="startBingoGame()">🎲 Bingo</button>
-                    <button class="util-btn" style="border-color:#00bfff; color:#00bfff;" onclick="launchLivePoll()">📝 Poll ፍጠር</button>
-                    <button class="util-btn" onclick="playRealSound('applause')">👏 ጭብጨባ</button>
-                    <button class="util-btn" onclick="playRealSound('laughter')">😂 ሳቅ</button>
+                    <button class="btn-3d-sm" style="border-color:#ffdd67; color:#ffdd67;" onclick="runLuckyDraw()">🎰 Lucky Draw</button>
+                    <button class="btn-3d-sm" style="border-color:#00ff7f; color:#00ff7f;" onclick="startBingoGame()">🎲 Bingo</button>
+                    <button class="btn-3d-sm" style="border-color:#00bfff; color:#00bfff;" onclick="launchLivePoll()">📝 Poll ፍጠር</button>
+                    <button class="btn-3d-sm" onclick="playRealSound('applause')">👏 ጭብጨባ</button>
+                    <button class="btn-3d-sm" onclick="playRealSound('laughter')">😂 ሳቅ</button>
                 </div>
                 
                 <div class="slider-fx-container">
@@ -270,10 +309,10 @@ async def get_index():
                         <span>🎤 ድምፅ ማጣሪያ፦</span>
                         <select class="fx-select" id="voice-fx-mode" onchange="changeVoiceFX(this.value)">
                             <option value="normal">⚙️ መደበኛ ድምፅ</option>
-                            <option value="echo">📻 Echo (የመድረክ ድምፅ)</option>
-                            <option value="robot">🤖 ሮቦት ፊልተር</option>
+                            <option value="echo">📻 Echo (መድረክ)</option>
+                            <option value="robot">🤖 ሮቦት</option>
                         </select>
-                        <button class="util-btn" style="padding:2px 8px; font-size:10px; background:#fe2c55;" onclick="toggleModMode()">🛡️ Mod ሹም</button>
+                        <button class="btn-3d-sm" style="padding:3px 10px; background:#fe2c55; max-width:80px;" onclick="toggleModMode()">🛡️ Mod ሹም</button>
                     </div>
                 </div>
             </div>
@@ -281,15 +320,15 @@ async def get_index():
             <div class="chat-area" id="chat-box"></div>
 
             <div class="chat-input-container">
-                <input type="text" id="text-msg-input" class="chat-input" placeholder="ሀሳብዎን እዚህ ይፃፉ..." onkeypress="if(event.key==='Enter') sendTextMessage()">
+                <input type="text" id="text-msg-input" class="chat-input" placeholder="ለሹክሹክታ /w @ስም መልእክት ወይም መደበኛ ፅሁፍ...">
                 <button class="btn-send-text" onclick="sendTextMessage()">➔</button>
             </div>
             
             <div class="bottom-controls">
-                <button class="action-btn" style="background: linear-gradient(45deg, #25f4ee, #00bfff); color:#060713; border:none; padding:11px 18px; border-radius:25px; font-weight:800; font-size:13px; cursor:pointer;" onclick="requestSeatAuto()">🎙️ መቀመጫ ያዝ</button>
+                <button class="btn-3d" style="max-width:140px; padding:10px;" onclick="requestSeatAuto()">🎙️ መቀመጫ ያዝ</button>
                 <div style="display:flex; align-items:center;">
-                    <button class="action-btn" style="background: linear-gradient(45deg, #fe2c55, #ff5574); padding:11px 18px; font-weight:800; font-size:13px; border-radius:25px;" onclick="openGiftTray()">🎁 ስጦታ</button>
-                    <div class="nav-icon" style="background: rgba(255,255,255,0.06); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; margin-left:10px;" id="mic-toggle-btn" onclick="toggleMic()">🔊</div>
+                    <button class="btn-3d btn-3d-green" style="max-width:100px; padding:10px; margin-right:10px;" onclick="openGiftTray()">🎁 ስጦታ</button>
+                    <div class="nav-icon" style="background: rgba(255,255,255,0.06); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; border:1px solid rgba(255,255,255,0.1);" id="mic-toggle-btn" onclick="toggleMic()">🔊</div>
                 </div>
             </div>
         </div>
@@ -304,8 +343,8 @@ async def get_index():
             <div class="wheel-box" id="wheel-zone" style="display:none;" onclick="event.stopPropagation()">
                 <h3>🎡 ዕለታዊ የዕድል ማሽከርከሪያ</h3>
                 <div class="wheel-graphic" id="wheel-element">🎁</div>
-                <button class="btn-create" onclick="spinTheWheelAction()">🎰 አሽከርክር</button>
-                <button class="util-btn" style="margin-top:10px; width:100%;" onclick="closeGiftTray()">ዝጋ</button>
+                <button class="btn-3d btn-3d-green" onclick="spinTheWheelAction()">🎰 አሽከርክር</button>
+                <button class="btn-3d-sm" style="margin-top:12px; width:100%;" onclick="closeGiftTray()">ዝጋ</button>
             </div>
         </div>
 
@@ -317,8 +356,11 @@ async def get_index():
             let localAudioTrack = null; let currentSeat = null;
             let myUsername = "እንግዳ"; let currentRoomName = ""; let myCoins = 350; let isModMode = false;
             
+            // ⏱️ የመናገሪያ ሰዓት ኮይን መቁጠሪያ ቫሪያብልስ
+            let micTimerInterval = null; let secondsOnMic = 0;
+
             let audioContext = null; let analyser = null; let dataArray = null; let animationFrameId = null;
-            let seatsData = {{ 1:{{name:"ባዶ",active:false,mod:false}}, 2:{{name:"ባዶ",active:false,mod:false}}, 3:{{name:"ባዶ",active:false,mod:false}}, 4:{{name:"ባዶ",active:false,mod:false}}, 5:{{name:"ባዶ",active:false,mod:false}}, 6:{{name:"ባዶ",active:false,mod:false}} }};
+            let seatsData = {{ 1:{{name:"ባዶ",active:false}}, 2:{{name:"ባዶ",active:false}}, 3:{{name:"ባዶ",active:false}}, 4:{{name:"ባዶ",active:false}}, 5:{{name:"ባዶ",active:false}}, 6:{{name:"ባዶ",active:false}} }};
 
             function switchTab(tabName) {{
                 document.getElementById("lobby-screen").style.display = "none";
@@ -382,7 +424,7 @@ async def get_index():
                 const audio = document.getElementById("bg-kirar-audio");
                 audio.volume = 0.15;
                 document.getElementById("kirar-vol-slider").value = 15;
-                audio.play().catch(e => console.log("Audio awaiting interaction."));
+                audio.play().catch(e => console.log("Audio waiting."));
 
                 appendChat("🚀 Mela System", ` ወደ "${{currentRoomName}}" ክፍል በሰላም መጡ!`, "color:#25f4ee; font-weight:bold;");
                 renderSeats();
@@ -404,17 +446,27 @@ async def get_index():
                 }} catch (err) {{ console.log(err); }}
             }}
 
-            // ✍️ ፅሁፍ ሲላክ ከተላከ በኋላ ቦታ የሚለቅና ስክሮል የሚያደርግ (Fixed & Enhanced!)
+            // 🤫 የሹክሹክታ (Whisper Chat) እና መደበኛ ፅሁፍ ሲስተም
             function sendTextMessage() {{
                 const inputEl = document.getElementById("text-msg-input");
                 const msgText = inputEl.value.trim();
                 if(!msgText) return;
                 
+                // 🤫 የሹክሹክታ ሎጂክ ማጣሪያ (ፎርማት: /w @ስም መልእክት)
+                if(msgText.startsWith("/w ")) {{
+                    const parts = msgText.split(" ");
+                    if(parts.length >= 3 && parts[1].startsWith("@")) {{
+                        const targetUser = parts[1].replace("@", "");
+                        const secretMsg = parts.slice(2).join(" ");
+                        appendChat("🤫 ሚስጥራዊ ሹክሹክታ ለ [" + targetUser + "]", secretMsg, "color: #ffaa00; background: rgba(255,170,0,0.08); padding: 5px 10px; border-radius: 8px; border-left: 3px solid #ffaa00;");
+                        inputEl.value = ""; inputEl.focus();
+                        return;
+                    }}
+                }}
+
+                // መደበኛ መልእክት
                 appendChat(myUsername, msgText, "color: #fff; background: rgba(255,255,255,0.02); padding: 5px 10px; border-radius: 8px;");
-                
-                // 🧼 ሳጥኑን ባዶ ማድረግ (ቦታ እንዲለቅ)
-                inputEl.value = "";
-                inputEl.focus();
+                inputEl.value = ""; inputEl.focus();
             }}
 
             function appendChat(user, msg, style = "") {{
@@ -423,20 +475,38 @@ async def get_index():
                 div.style = style;
                 div.innerHTML = `<b>${{user}}:</b> ${{msg}}`;
                 box.appendChild(div);
-                
-                // 📜 ወደ ታች አውቶማቲክ ስክሮል ማድረጊያ
                 box.scrollTop = box.scrollHeight;
             }}
 
-            // 🤖 የቴሌግราม ቦት አውቶማቲክ ማሳወቂያ መላኪያ (Telegram Alert)
+            // ⏱️ ማይክ ሰዓት እና ነፃ ኮይን መቁጠሪያ (Voice-Time Reward Logic)
+            function startMicTimer() {{
+                secondsOnMic = 0;
+                const badge = document.getElementById("mic-timer-badge");
+                badge.style.display = "inline-block";
+                
+                micTimerInterval = setInterval(() => {{
+                    secondsOnMic++;
+                    // በየ 60 ሰከንዱ 1 ኮይን ሽልማት
+                    if(secondsOnMic % 60 === 0) {{
+                        myCoins += 1;
+                        appendChat("🎁 የንግግር ሽልማት", ` 🎉 መድረክ ላይ 1 ደቂቃ በመቆየትዎ 1 ነፃ ኮይን አግኝተዋል!`, "color:#ffdd67; font-weight:bold;");
+                    }}
+                    badge.innerText = `🎤 መድረክ ላይ፦ ${{secondsOnMic}} ሰከንድ (🪙 +${{Math.floor(secondsOnMic/60)}})`;
+                }}, 1000);
+            }}
+
+            function stopMicTimer() {{
+                if(micTimerInterval) {{ clearInterval(micTimerInterval); micTimerInterval = null; }}
+                document.getElementById("mic-timer-badge").style.display = "none";
+            }}
+
             function sendBotNotification(text) {{
                 const token = "{TELEGRAM_BOT_TOKEN}";
                 const chat_id = "{ADMIN_CHAT_ID}";
                 const url = `https://api.telegram.org/bot${{token}}/sendMessage?chat_id=${{chat_id}}&text=${{encodeURIComponent(text)}}`;
-                fetch(url).catch(e => console.log("Bot push failed."));
+                fetch(url).catch(e => console.log(e));
             }}
 
-            // 🎡 ዕድል ማሽከርከሪያ ሲስተም
             function openWheelModal() {{
                 document.getElementById("gift-modal-overlay").style.display = "flex";
                 document.getElementById("gift-tray-zone").style.display = "none";
@@ -445,11 +515,10 @@ async def get_index():
 
             function spinTheWheelAction() {{
                 const wheel = document.getElementById("wheel-element");
-                const randomDeg = Math.floor(Math.random() * 360) + 1800; // 5 ዙር እንዲዞር
+                const randomDeg = Math.floor(Math.random() * 360) + 1800;
                 wheel.style.transform = `rotate(${{randomDeg}}deg)`;
-                
                 setTimeout(() => {{
-                    const prizes = ["🪙 10 കോയിൻ", "🌹 ጽጌረዳ", "🪙 5 കോയിን", "😢 ዕድል የለም"];
+                    const prizes = ["🪙 10 ኮይን", "🌹 ጽጌረዳ", "🪙 5 ኮይን", "😢 ዕድል የለም"];
                     const win = prizes[Math.floor(Math.random() * prizes.length)];
                     alert(`🎉 ዕድል ማሽከርከሪያው ቆሟል! ያሸነፉት ስጦታ፦ ${{win}}`);
                     if(win.includes("10")) myCoins += 10;
@@ -458,20 +527,17 @@ async def get_index():
                 }, 3100);
             }}
 
-            // 🛡️ የክፍል አወያይ (Moderator Mode)
             function toggleModMode() {{
                 isModMode = !isModMode;
-                alert(isModMode ? "🛡️ የአወያይነት (Mod Mode) በርቷል! አሁን ሰዎችን Mute/Kick ማድረግ ይችላሉ።" : "የአወያይነት ሁኔታ ጠፍቷል።");
+                alert(isModMode ? "🛡️ አወያይነት በርቷል!" : "አወያይነት ጠፍቷል።");
             }}
 
-            // 📝 የቀጥታ ጥያቄና መልስ (Live Poll)
             function launchLivePoll() {{
-                let question = prompt("የሕዝብ አስተያየት (Poll) ጥያቄ ያስገቡ፦");
+                let question = prompt("የአስተያየት ጥያቄ ያስገቡ፦");
                 if(!question) return;
                 appendChat("📝 LIVE POLL", ` 📊 ጥያቄ፦ "${{question}}"\\n1️⃣ አዎ (0%) | 2️⃣ አይደለም (0%)`, "color:#00bfff; font-weight:bold; background:rgba(0,191,255,0.05); padding:8px; border-radius:8px;");
             }}
 
-            // 🎲 የቢንጎ ጨዋታ
             function startBingoGame() {{
                 appendChat("🎲 BINGO", ` [${{myUsername}}] አዲስ የቢንጎ ግሩፕ ጨዋታ በአዳራሹ ጀምሯል!`, "color:#00ff7f; font-weight:bold;");
                 let count = 0;
@@ -537,7 +603,7 @@ async def get_index():
             async function exitRoom() {{
                 document.getElementById("bg-kirar-audio").pause();
                 if(localAudioTrack) {{ localAudioTrack.stop(); localAudioTrack.close(); localAudioTrack = null; }}
-                stopVoiceWave(); await client.leave(); currentSeat = null;
+                stopVoiceWave(); stopMicTimer(); await client.leave(); currentSeat = null;
                 document.getElementById("room-screen").style.display = "none";
                 document.getElementById("main-nav-bar").style.display = "flex";
                 switchTab('home');
@@ -565,13 +631,17 @@ async def get_index():
             async function claimSeat(seatId) {{
                 if (seatsData[seatId].active) {{
                     if(isModMode) {{
-                        let action = confirm(`🛡️ አወያይ፦ [${{seatsData[seatId].name}}] ከዚህ መቀመጫ ላይ ማውረድ/ማባረር ይፈልጋሉ?`);
+                        let action = confirm(`🛡️ አወያይ፦ [${{seatsData[seatId].name}}] ከዚህ መቀመጫ ላይ ማውረድ ይፈልጋሉ?`);
                         if(action) {{ seatsData[seatId] = {{ name: "ባዶ", active: false }}; renderSeats(); }}
                     }}
                     return;
                 }}
-                if (currentSeat) seatsData[currentSeat] = {{ name: "ባዶ", active: false }};
+                if (currentSeat) {{ seatsData[currentSeat] = {{ name: "ባዶ", active: false }}; stopMicTimer(); }}
                 currentSeat = seatId; seatsData[seatId] = {{ name: myUsername, active: true }}; renderSeats();
+                
+                // ⏱️ ማይክ ላይ መቀመጡን ሲያረጋግጥ ሰዓት ቆጣሪውን ማስጀመር
+                startMicTimer();
+
                 try {{
                     await client.setClientRole("host");
                     if (!localAudioTrack) {{
