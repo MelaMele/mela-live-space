@@ -1,5 +1,4 @@
 import os
-import sqlite3
 import requests
 import threading
 import time
@@ -10,7 +9,7 @@ from typing import Optional
 
 app = FastAPI(title="Mela Space - Ultimate Video & Voice Ecosystem")
 
-# 📱 የባለቤትነት መብት እና መለያዎች (created by: Melaku Mebrate Tekle)
+# 📱 የባለቤትነት መብት እና መለያዎች
 MY_TELEBIRR_NUMBER = "0913064239"  
 MY_NAME = "Melaku Mebrate Tekle"         
 
@@ -18,36 +17,9 @@ MY_NAME = "Melaku Mebrate Tekle"
 TELEGRAM_BOT_TOKEN = "8327536456:AAHn6AqMUIayCjUUTF5up8cICR_4BvjbiKs"  
 ADMIN_CHAT_ID = "1065443252"               
 
-DB_FILE = "mela_space_pro.db"
+# 📂 ዳታቤዝ-አልባ የIn-Memory መዋቅር (Vercel ወይም ማናቸውም ሰርቨር ላይ እንዳይበላሽ)
+USERS_MEMORY = {}
 
-# 🛠️ የዳታቤዝ መዋቅር መፍጠሪያ (Persistent SQLite Setup)
-def init_db():
-    conn = sqlite3.connect(DB_FILE)
-    cursor = conn.cursor()
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS users (
-            telegram_id TEXT PRIMARY KEY,
-            username TEXT,
-            coins INTEGER DEFAULT 350,
-            referred_by TEXT
-        )
-    """)
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS transactions (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            telegram_id TEXT,
-            tx_type TEXT,
-            amount INTEGER,
-            reference_id TEXT,
-            status TEXT DEFAULT 'PENDING'
-        )
-    """)
-    conn.commit()
-    conn.close()
-
-init_db()
-
-# 📦 ፒዳንቲክ ሞዴሎች (Data Schemas)
 class UserRegistration(BaseModel):
     telegram_id: str
     username: str
@@ -63,149 +35,86 @@ class CashOutRequest(BaseModel):
     coins_to_cash: int
     telebirr_phone: str
 
-# --- 🤖 የቴሌግราม ቦት አውቶማቲክ መቆጣጠሪያ ክፍል (Bot Background Worker) ---
-def send_telegram_message(chat_id, text):
+# --- 🤖 የቴሌግራም ቦት ጀርባ ሰራተኛ (Telegram Bot Engine) ---
+def push_bot_message(chat_id, text):
     url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
-    payload = {"chat_id": chat_id, "text": text, "parse_mode": "HTML"}
     try:
-        requests.post(url, json=payload, timeout=5)
+        requests.post(url, json={"chat_id": chat_id, "text": text, "parse_mode": "HTML"}, timeout=5)
     except Exception as e:
-        print("Telegram Push Failed:", e)
+        print("Bot Notification Error:", e)
 
-def telegram_bot_poll():
-    """ ቀላል ሎንግ ፖሊንግ (Long Polling) ሲስተም ተጨማሪ ሊብራሪ ሳይጭን ቦቱን ለማስነሳት """
+def run_telegram_polling():
     offset = 0
-    print("🚀 Mela Telegram Bot Engine Started Successfully...")
+    print("🤖 Mela Telegram Bot successfully hooked and running...")
     while True:
         try:
             url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/getUpdates?offset={offset}&timeout=10"
-            res = requests.get(url, timeout=15).json()
-            if "result" in res:
-                for update in res["result"]:
+            updates = requests.get(url, timeout=12).json()
+            if "result" in updates:
+                for update in updates["result"]:
                     offset = update["update_id"] + 1
                     if "message" in update and "text" in update["message"]:
                         msg = update["message"]
                         chat_id = str(msg["chat"]["id"])
                         text = msg["text"].strip()
-                        user_first_name = msg["from"].get("first_name", "ተጠቃሚ")
+                        first_name = msg["from"].get("first_name", "ተጠቃሚ")
 
-                        # 🔗 የሪፈራል /start ትዕዛዝ አያያዝ
                         if text.startswith("/start"):
                             ref_id = None
                             if " " in text:
-                                ref_parts = text.split(" ")
-                                if len(ref_parts) > 1 and ref_parts[1].startswith("ref_"):
-                                    ref_id = ref_parts[1].replace("ref_", "")
+                                parts = text.split(" ")
+                                if len(parts) > 1 and parts[1].startswith("ref_"):
+                                    ref_id = parts[1].replace("ref_", "")
 
-                            conn = sqlite3.connect(DB_FILE)
-                            cursor = conn.cursor()
-                            cursor.execute("SELECT coins FROM users WHERE telegram_id = ?", (chat_id,))
-                            user_exists = cursor.fetchone()
+                            if chat_id not in USERS_MEMORY:
+                                USERS_MEMORY[chat_id] = {"username": first_name, "coins": 350}
+                                if ref_id and ref_id in USERS_MEMORY and ref_id != chat_id:
+                                    USERS_MEMORY[ref_id]["coins"] += 20
+                                    push_bot_message(ref_id, f"🎉 <b>የሪፈራል ስጦታ!</b>\n\n👤 {first_name} በእርስዎ ሊንክ ስለገባ 20 ነፃ 🪙 ተጨምሮልዎታል!")
 
-                            if not user_exists:
-                                cursor.execute("INSERT INTO users (telegram_id, username, coins, referred_by) VALUES (?, ?, ?, ?)",
-                                               (chat_id, user_first_name, 350, ref_id))
-                                if ref_id and ref_id != chat_id:
-                                    cursor.execute("UPDATE users SET coins = coins + 20 WHERE telegram_id = ?", (ref_id,))
-                                    cursor.execute("INSERT INTO transactions (telegram_id, tx_type, amount, status) VALUES (?, 'REFERRAL_BONUS', 20, 'SUCCESS')", (ref_id,))
-                                    send_telegram_message(ref_id, f"🎉 <b>የሪፈራል ስጦታ!</b>\n\n👤 {user_first_name} በእርስዎ ሊንክ ስለተቀላቀለ 20 ነፃ 🪙 ዋሌትዎ ላይ ተጨምሯል!")
-                                conn.commit()
-                            conn.close()
-
-                            web_app_url = "https://your-domain.com" # እዚህ ላይ ያንተን እውነተኛ አድራሻ ትተካለህ
-                            welcome_text = f"👋 ሰላም {user_first_name}!\n\nእንኳን ወደ <b>Mela Space</b> የቪዲዮ እና የድምፅ የቀጥታ መስተጋብራዊ መድረክ በሰላም መጡ።\n\n🎁 ለመጀመሪያ ጊዜ ስለገቡ <b>350 የ Mela ኮይኖች</b> በነፃ ተበርክቶልዎታል።\n\n🔗 <b>ያንተ የሪፈራል ሊንክ፦</b>\n<code>https://t.me/MelaSpaceBot?start=ref_{chat_id}</code>\n\n🎙️ አሁኑኑ ክፍሎችን ለመቀላቀል መተግበሪያውን ይክፈቱ!"
-                            send_telegram_message(chat_id, welcome_text)
-
-                        # 🛠️ ለአስተዳዳሪው የሚሰሩ የትዕዛዝ ቁልፎች (Admin Verification Commands)
-                        elif chat_id == ADMIN_CHAT_ID:
-                            if text.startswith("/approve_deposit"):
-                                # ምሳሌ: /approve_deposit_TGID_AMOUNT
-                                parts = text.split("_")
-                                if len(parts) >= 4:
-                                    target_id = parts[2]
-                                    amount = int(parts[3])
-                                    conn = sqlite3.connect(DB_FILE)
-                                    cursor = conn.cursor()
-                                    cursor.execute("UPDATE users SET coins = coins + ? WHERE telegram_id = ?", (amount, target_id))
-                                    conn.commit()
-                                    conn.close()
-                                    send_telegram_message(ADMIN_CHAT_ID, f"✅ ተጠቃሚ {target_id} በስኬት {amount} ኮይን ገብቶለታል።")
-                                    send_telegram_message(target_id, f"💳 <b>የክፍያ ማረጋገጫ!</b>\n\nበቴሌብር የገዙት <b>{amount} 🪙</b> ዋሌትዎ ላይ በስኬት ተጨምሯል! ማየት ይችላሉ።")
+                            welcome_msg = f"👋 ሰላም {first_name}!\n\nእንኳን ወደ <b>Mela Space</b> በሰላም መጡ።\n\n🎁 መተግበሪያውን ስለከፈቱ <b>350 ነፃ ኮይኖች</b> ተሰጥተውዎታል።\n\n🔗 <b>የእርስዎ መጋበዣ (Referral) ሊንክ፦</b>\n<code>https://t.me/MelaSpaceBot?start=ref_{chat_id}</code>"
+                            push_bot_message(chat_id, welcome_msg)
         except Exception as e:
             time.sleep(2)
 
-# ቦቱን በጀርባ (Thread) ላይ ማስነሳት
-bot_thread = threading.Thread(target=telegram_bot_poll, daemon=True)
-bot_thread.start()
+# ቦቱን ከFastAPI ጎን ለጎን ማስነሳት
+threading.Thread(target=run_telegram_polling, daemon=True).start()
 
-# --- 🌐 የባክአንድ ኤፒአይ ኤንድፖይንቶች (FastAPI REST Engine) ---
+# --- 🌐 የባክአንድ ኤፒአይ ኤንድፖይንቶች ---
 
 @app.post("/api/register")
 def register_user(user: UserRegistration):
-    conn = sqlite3.connect(DB_FILE)
-    cursor = conn.cursor()
-    cursor.execute("SELECT coins FROM users WHERE telegram_id = ?", (user.telegram_id,))
-    row = cursor.fetchone()
+    tg_id = user.telegram_id
+    if tg_id in USERS_MEMORY:
+        return {"status": "exists", "telegram_id": tg_id, "coins": USERS_MEMORY[tg_id]["coins"]}
     
-    if row:
-        current_coins = row[0]
-        conn.close()
-        return {"status": "exists", "telegram_id": user.telegram_id, "coins": current_coins}
-    
-    initial_coins = 350
-    cursor.execute("INSERT INTO users (telegram_id, username, coins, referred_by) VALUES (?, ?, ?, ?)",
-                   (user.telegram_id, user.username, initial_coins, user.referred_by))
-    conn.commit()
-    conn.close()
-    return {"status": "created", "telegram_id": user.telegram_id, "coins": initial_coins}
+    USERS_MEMORY[tg_id] = {"username": user.username, "coins": 350}
+    if user.referred_by and user.referred_by in USERS_MEMORY and user.referred_by != tg_id:
+        USERS_MEMORY[user.referred_by]["coins"] += 20
+    return {"status": "created", "telegram_id": tg_id, "coins": 350}
 
 @app.get("/api/wallet/{telegram_id}")
 def get_wallet_balance(telegram_id: str):
-    conn = sqlite3.connect(DB_FILE)
-    cursor = conn.cursor()
-    cursor.execute("SELECT coins, username FROM users WHERE telegram_id = ?", (telegram_id,))
-    row = cursor.fetchone()
-    conn.close()
-    if not row:
-        return {"telegram_id": telegram_id, "username": "እንግዳ", "coins": 350}
-    return {"telegram_id": telegram_id, "username": row[1], "coins": row[0]}
+    if telegram_id not in USERS_MEMORY:
+        USERS_MEMORY[telegram_id] = {"username": "እንግዳ", "coins": 350}
+    return {"telegram_id": telegram_id, "username": USERS_MEMORY[telegram_id]["username"], "coins": USERS_MEMORY[telegram_id]["coins"]}
 
 @app.post("/api/purchase-coins")
 def purchase_coins(data: CoinPurchase):
-    conn = sqlite3.connect(DB_FILE)
-    cursor = conn.cursor()
-    cursor.execute("INSERT INTO transactions (telegram_id, tx_type, amount, reference_id, status) VALUES (?, 'TELEBIRR_DEPOSIT', ?, ?, 'PENDING')",
-                   (data.telegram_id, data.amount_coins, data.telebirr_tx_id))
-    conn.commit()
-    conn.close()
-    
-    # ለአስተዳዳሪው ፈጣን ማረጋገጫ በቴሌግራም መላክ
-    admin_msg = f"💳 <b>አዲስ የኮይን ግዢ ጥያቄ!</b>\n\n👤 ተጠቃሚ ID: <code>{data.telegram_id}</code>\n🪙 የኮይን መጠን: {data.amount_coins}\n🧾 Telebirr TX ID: <code>{data.telebirr_tx_id}</code>\n\nለማጽደቅ፦ <code>/approve_deposit_{data.telegram_id}_{data.amount_coins}</code>"
-    send_telegram_message(ADMIN_CHAT_ID, admin_msg)
+    admin_msg = f"💳 <b>አዲስ የቴሌብር ክፍያ ጥያቄ!</b>\n\n👤 ተጠቃሚ ID: <code>{data.telegram_id}</code>\n🪙 መጠን: {data.amount_coins}\n🧾 TX ID: <code>{data.telebirr_tx_id}</code>"
+    push_bot_message(ADMIN_CHAT_ID, admin_msg)
     return {"status": "submitted", "message": "የክፍያ ጥያቄዎ ለአስተዳዳሪው ተልኳል፤ ሲረጋገጥ ኮይኑ ይገባል!"}
 
 @app.post("/api/cash-out")
 def cash_out_tokens(data: CashOutRequest):
-    conn = sqlite3.connect(DB_FILE)
-    cursor = conn.cursor()
-    cursor.execute("SELECT coins FROM users WHERE telegram_id = ?", (data.telegram_id,))
-    row = cursor.fetchone()
-    
-    if not row or row[0] < data.coins_to_cash:
-        conn.close()
-        raise HTTPException(status_code=400, detail="ለማውጣት የጠየቁት ኮይን ከባላንስዎ ይበልጣል!")
-        
-    cursor.execute("UPDATE users SET coins = coins - ? WHERE telegram_id = ?", (data.coins_to_cash, data.telegram_id))
-    cursor.execute("INSERT INTO transactions (telegram_id, tx_type, amount, reference_id, status) VALUES (?, 'CASH_OUT', ?, ?, 'PENDING')",
-                   (data.telegram_id, data.coins_to_cash, data.telebirr_phone))
-    conn.commit()
-    conn.close()
-    
-    admin_msg = f"💸 <b>የገንዘብ ማውጫ (Cash-Out) ጥያቄ!</b>\n\n👤 ተጠቃሚ ID: <code>{data.telegram_id}</code>\n🪙 የደረሰ ኮይን: {data.coins_to_cash}\n📱 የቴሌብር ስልክ: {data.telebirr_phone}"
-    send_telegram_message(ADMIN_CHAT_ID, admin_msg)
-    return {"status": "success", "message": "የመውጫ ጥያቄዎ ተመዝግቧል፤ በቅርቡ በቴሌብር ይላክልዎታል!"}
+    tg_id = data.telegram_id
+    if tg_id in USERS_MEMORY and USERS_MEMORY[tg_id]["coins"] >= data.coins_to_cash:
+        USERS_MEMORY[tg_id]["coins"] -= data.coins_to_cash
+        admin_msg = f"💸 <b>የካሽ አውት ጥያቄ!</b>\n\n👤 ተጠቃሚ ID: <code>{tg_id}</code>\n🪙 ኮይን: {data.coins_to_cash}\n📱 ስልክ: {data.telebirr_phone}"
+        push_bot_message(ADMIN_CHAT_ID, admin_msg)
+        return {"status": "success", "message": "የመውጫ ጥያቄዎ ተመዝግቧል!"}
+    raise HTTPException(status_code=400, detail="በቂ ኮይን የለዎትም!")
 
-# --- 🖥️ ዋናው የፊት-ለፊት (UI HTML) ገጽ ---
 @app.get("/", response_class=HTMLResponse)
 async def get_index():
     html_content = f"""
@@ -256,7 +165,7 @@ async def get_index():
             .room-list-title {{ font-size:15px; color:#888; margin-bottom:12px; font-weight:bold; z-index: 2; }}
             .room-item {{ background: rgba(22, 23, 34, 0.6); border:1px solid rgba(255,255,255,0.05); padding:15px; border-radius:16px; display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; cursor:pointer; z-index: 2; }}
 
-            /* 🗂️ የታብ ገፆች */
+            /* 🗂️  ታብ ገፆች */
             .tab-screen {{ display:none; position:absolute; top:0; left:0; width:100%; height:calc(100% - 70px); background:#060713; z-index:400; padding:20px; overflow-y:auto; }}
             .page-title {{ font-size:24px; font-weight:800; color:#25f4ee; margin-bottom:20px; text-align:center; }}
             .info-card {{ background: rgba(22, 23, 34, 0.7); border:1px solid rgba(255,255,255,0.06); border-radius:20px; padding:20px; margin-bottom:15px; text-align:center; }}
@@ -311,7 +220,7 @@ async def get_index():
             .volume-slider {{ flex: 1; -webkit-appearance: none; background: rgba(255,255,255,0.1); height: 5px; border-radius: 3px; outline: none; }}
             .volume-slider::-webkit-slider-thumb {{ -webkit-appearance: none; appearance: none; width: 14px; height: 14px; border-radius: 50%; background: #25f4ee; cursor: pointer; }}
 
-            /* 💬  ቀጥታ ቻት ክልል */
+            /* 💬 የቀጥታ ቻት ክልል */
             .chat-area {{ height: 95px; width: 100%; padding: 10px; background: linear-gradient(transparent, rgba(6,7,19,0.98)); overflow-y: auto; font-size: 12px; display: flex; flex-direction: column; gap: 5px; z-index: 10; scroll-behavior: smooth; }}
             
             /* ✍️ የፅሁፍ መፃፊያ ባር */
@@ -399,7 +308,7 @@ async def get_index():
                 <button class="util-btn-3d" style="width:100%; margin-top:12px; border-color:#00ff7f; color:#00ff7f;" onclick="openWheelModal()">🎡 ዕለታዊ ዕድል ማሽከርከሪያ (Daily Wheel)</button>
             </div>
 
-            <div class="room-list-title">🟢 የቀጥታ ውይይት ክፍሎች</div>
+            <div class="room-list-title">🟢  የቀጥታ ውይይት ክፍሎች</div>
             <div id="active-rooms-list">
                 <div class="room-item" onclick="joinExistingRoom('🌍 የስደት ወግ (Diaspora Lounge)')">
                     <div>
