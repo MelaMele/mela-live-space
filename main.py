@@ -72,10 +72,11 @@ def run_telegram_polling():
                                     USERS_MEMORY[ref_id]["coins"] += 20
                                     push_bot_message(ref_id, f"🎉 <b>የሪፈራል ስጦታ!</b>\n\n👤 {first_name} በእርስዎ ሊንክ ስለገባ 20 ነፃ 🪙 ተጨምሮልዎታል!")
 
+                            # ✅ እዚህ ጋር የዕርከን (Indentation) ስህተቱ ሙሉ በሙሉ ተስተካክሏል
                             welcome_msg = f"👋 ሰላም {first_name}!\n\nእንኳን ወደ <b>Mela Space</b> በሰላም መጡ。\n\n🎁 መተግበሪያውን ስለከፈቱ <b>350 ነፃ ኮይኖች</b> ተሰጥተውዎታል።\n\n🔗 <b>የእርስዎ መጋበዣ (Referral) ሊንክ፦</b>\n<code>https://t.me/MelaLiveAudioVideoChat_bot?start=ref_{chat_id}</code>"
                             push_bot_message(chat_id, welcome_msg)
         except Exception as e:
-            print("Polling Error:", e)
+            print("Polling Exception Error:", e)
             time.sleep(2)
 
 # ቦቱን ከFastAPI ጎን ለጎን ማስነሳት
@@ -268,7 +269,7 @@ async def get_index():
         <div class="bottom-nav" id="main-nav-bar">
             <div class="nav-item active" id="nav-home" onclick="switchTab('home')">
                 <div class="nav-icon">🎙️</div>
-                <div>ክфሎች</div>
+                <div>ክፍሎች</div>
             </div>
             <div class="nav-item" id="nav-wallet" onclick="switchTab('wallet')">
                 <div class="nav-icon">👛</div>
@@ -286,16 +287,16 @@ async def get_index():
             <div class="create-room-box">
                 <input type="text" id="lobby-tg-id" class="input-field" placeholder="የቴሌግራም መለያ ቁጥር (ID) ያስገቡ...">
                 <input type="text" id="lobby-username" class="input-field" placeholder="የእርስዎን ስም ያስገቡ...">
-                <input type="text" id="lobby-roomname" class="input-field" placeholder="የክфሉን ስም ያስገቡ...">
+                <input type="text" id="lobby-roomname" class="input-field" placeholder="የክፍሉን ስም ያስገቡ...">
                 <div class="checkbox-container">
                     <input type="checkbox" id="lobby-is-vip">
-                    <label for="lobby-is-vip">🔒 እንደ VIP (የግል ሚስጥራዊ ክфል) ፍጠር</label>
+                    <label for="lobby-is-vip">🔒 እንደ VIP (የግል ሚስጥራዊ ክፍል) ፍጠር</label>
                 </div>
-                <button class="btn-3d" onclick="createNewRoomAction()">🚀 አዲስ ክфል ፍጠር</button>
+                <button class="btn-3d" onclick="createNewRoomAction()">🚀 አዲስ ክፍል ፍጠር</button>
                 <button class="util-btn-3d" style="width:100%; margin-top:12px; border-color:#00ff7f; color:#00ff7f;" onclick="openWheelModal()">🎡 ዕለታዊ ዕድል ማሽከርከሪያ (Daily Wheel)</button>
             </div>
 
-            <div class="room-list-title">🟢  የቀጥታ ውይይት ክфሎች</div>
+            <div class="room-list-title">🟢  የቀጥታ ውይይት ክፍሎች</div>
             <div id="active-rooms-list">
                 <div class="room-item" onclick="joinExistingRoom('🌍 የስደት ወግ (Diaspora Lounge)')">
                     <div>
@@ -373,7 +374,7 @@ async def get_index():
         <div class="app-container" id="room-screen">
             <div class="top-bar">
                 <div class="live-tag" id="room-badge-type">🔴 LIVE</div>
-                <div class="room-name-display" id="active-room-title">ክфል: ---</div>
+                <div class="room-name-display" id="active-room-title">ክፍል: ---</div>
                 <div class="voice-counter-badge" id="voice-timer-display">⏱️ On Mic: 0s</div>
                 <div style="font-size:13px; color:#fe2c55; cursor:pointer; font-weight:bold;" onclick="exitRoom()">🚪 ውጣ</div>
             </div>
@@ -460,7 +461,7 @@ async def get_index():
         <div class="cinematic-stage" id="animation-stage-layer"><div class="big-gift-anim" id="big-gift-emoji-element">👑</div></div>
 
         <script>
-            let client = AgoraRTC.createClient({{ mode: "rtc", codec: "vp8" }});
+            let client = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" });
             let localAudioTrack = null; 
             let localVideoTrack = null; 
             
@@ -476,12 +477,12 @@ async def get_index():
             let comboCount = 0;
             let currentComboGift = "";
 
-            let seatsData = {{ 
-                1: {{name:"ባዶ", active:false}}, 
-                2: {{name:"ባዶ", active:false}}
-            }};
+            let seatsData = { 
+                1: {name:"ባዶ", active:false}, 
+                2: {name:"ባዶ", active:false}
+            };
         </script>
     </body>
     </html>
     """
-    return html_content
+    return HTMLResponse(content=html_content)
