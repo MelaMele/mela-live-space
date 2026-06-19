@@ -72,8 +72,7 @@ def run_telegram_polling():
                                     USERS_MEMORY[ref_id]["coins"] += 20
                                     push_bot_message(ref_id, f"🎉 <b>የሪፈራል ስጦታ!</b>\n\n👤 {first_name} በእርስዎ ሊንክ ስለገባ 20 ነፃ 🪙 ተጨምሮልዎታል!")
 
-                            welcome_msg = f"👋 ሰላም {first_name}!\n\nእንኳን ወደ <b>Mela Space</b> በሰላም መጡ።\n\n🎁 መተግበሪያውን ስለከፈቱ <b>350 ነፃ ኮይኖች</b> ተሰጥተውዎታል።\n\n🔗 <b>የእርስዎ መጋበዣ (Referral) ሊንክ፦</b>\n<code>https://t.me/MelaSpaceBot?start=ref_{chat_id}</code>"
-                            push_bot_message(chat_id, welcome_msg)
+                        welcome_msg = f"👋 ሰላም {first_name}!\n\nእንኳን ወደ <b>Mela Space</b> በሰላም መጡ።\n\n🎁 መተግበሪያውን ስለከፈቱ <b>350 ነፃ ኮይኖች</b> ተሰጥተውዎታል።\n\n🔗 <b>የእርስዎ መጋበዣ (Referral) ሊንክ፦</b>\n<code>https://t.me/MelaLiveAudioVideoChat_bot?start=ref_{chat_id}</code>"
         except Exception as e:
             time.sleep(2)
 
