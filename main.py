@@ -15,7 +15,7 @@ MY_NAME = "Melaku Mebrate Tekle"
 TELEGRAM_BOT_TOKEN = "8327536456:AAHn6AqMUIayCjUUTF5up8cICR_4BvjbiKs"  
 ADMIN_CHAT_ID = "1065443252"               
 
-DB_FILE = "mela_space_business.db"
+DB_FILE = ":memory:"
 
 # 🛠️ የዳታቤዝ መዋቅር መፍጠሪያ እና ማስነሻ ፈንክሽን
 def init_db():
