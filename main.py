@@ -14,7 +14,7 @@ MY_TELEBIRR_NUMBER = "0913064239"
 MY_NAME = "Melaku Mebrate Tekle"         
 
 # 🤖 የቴሌግራም ኮንፊገሬሽን
-TELEGRAM_BOT_TOKEN = "8327536456:AAHn6AqMUIayCjUUTF5up8cICR_4BvjbiKs"  
+TELEGRAM_BOT_TOKEN = "8601064642:AAH8xaqs9MkSqhoqvibJJn5ogGSCIeo0p28"  
 ADMIN_CHAT_ID = "1065443252"               
 
 # 📂 ዳታቤዝ-አልባ የIn-Memory መዋቅር (Vercel ወይም ማናቸውም ሰርቨር ላይ እንዳይበላሽ)
