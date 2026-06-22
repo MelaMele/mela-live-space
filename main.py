@@ -15,7 +15,7 @@ MY_TELEBIRR_NUMBER = "0913064239"
 MY_NAME = "Melaku Mebrate Tekle"         
 
 # 🤖 የቴሌግራም ኮንፊገሬሽን
-TELEGRAM_BOT_TOKEN = "8327536456:AAHn6AqMUIayCjUUTF5up8cICR_4BvjbiKs"  
+TELEGRAM_BOT_TOKEN = "8708757199:AAFWfFy9ujnZdXEJ2h6CYfzzqh_z27-_kDo"  
 ADMIN_CHAT_ID = "1065443252"               
 
 DB_FILE = "mela_space_pro.db"
