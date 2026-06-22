@@ -13,10 +13,9 @@ app = FastAPI(title="Mela Space - Ultimate Video & Voice Ecosystem")
 MY_TELEBIRR_NUMBER = "0913064239"  
 MY_NAME = "Melaku Mebrate Tekle"         
 
-# 🤖 የቴሌግራም ኮንፊገሬሽን (ከEnvironment Variables በራስ-ሰር እንዲያነብ ተደርጓል)
-# ማሳሰቢያ፦ ሲስተምህ ላይ BOT_TOKEN እና ADMIN_ID በሚል ስም ሴት አድርጋቸው። ካልሆነ እዚህ ላይ ቀጥታ መተካት ትችላለህ።
-TELEGRAM_BOT_TOKEN = os.environ.get("BOT_TOKEN", "8708757199:AAFWfFy9ujnZdXEJ2h6CYfzzqh_z27-_kDo")  
-ADMIN_CHAT_ID = os.environ.get("ADMIN_ID", "1065443252")               
+# 🤖 የቴሌግራም ኮንፊገሬชั่น (በአዲሱ ቶክንህ እና አይዲህ ቀጥታ ተተክቷል)
+TELEGRAM_BOT_TOKEN = "8708757199:AAFWfFy9ujnZdXEJ2h6CYfzzqh_z27-_kDo"  
+ADMIN_CHAT_ID = "1065443252"               
 
 # 📂 ዳታቤዝ-አልባ የIn-Memory መዋቅር (Vercel ወይም ማናቸውም ሰርቨር ላይ እንዳይበላሽ)
 USERS_MEMORY = {}
@@ -46,6 +45,22 @@ def push_bot_message(chat_id, text):
 
 def run_telegram_polling():
     offset = 0
+    print("=========================================")
+    print(f"🤖 Loaded BOT_TOKEN: {TELEGRAM_BOT_TOKEN[:10]}... (Hardcoded)")
+    print(f"👤 Loaded ADMIN_ID: {ADMIN_CHAT_ID}")
+    print("=========================================")
+    
+    # ከቴሌግራም ጋር ያለውን ግንኙነት መፈተኛ
+    try:
+        test_url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/getMe"
+        test_res = requests.get(test_url, timeout=5).json()
+        if test_res.get("ok"):
+            print(f"✅ Telegram Connection Success! Bot Name: @{test_res['result']['username']}")
+        else:
+            print(f"❌ Telegram Error: {test_res.get('description')}")
+    except Exception as e:
+        print(f"❌ Network Error connecting to Telegram: {e}")
+
     print("🤖 Mela Telegram Bot successfully hooked and running...")
     while True:
         try:
@@ -76,7 +91,8 @@ def run_telegram_polling():
                             welcome_msg = f"👋 ሰላም {first_name}!\n\nእንኳን ወደ <b>Mela Space</b> በሰላም መጡ。\n\n🎁 መተግበሪያውን ስለከፈቱ <b>350 ነፃ ኮይኖች</b> ተሰጥተውዎታል።\n\n🔗 <b>የእርስዎ መጋበዣ (Referral) ሊንክ፦</b>\n<code>https://t.me/MelaSpaceBot?start=ref_{chat_id}</code>"
                             push_bot_message(chat_id, welcome_msg)
         except Exception as e:
-            time.sleep(2)
+            print("Polling Inner Error:", e)
+            time.sleep(5)
 
 # ቦቱን ከFastAPI ጎን ለጎን ማስነሳት
 threading.Thread(target=run_telegram_polling, daemon=True).start()
@@ -126,7 +142,6 @@ async def get_index():
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
         <title>Mela Ultimate Pro Space - Created by Melaku Mebrate Tekle</title>
         
-        <!-- 📱 የቴሌግራም ሚኒ አፕ ስክሪፕት እዚህ ጋር ተጨምሯል -->
         <script src="https://telegram.org/js/telegram-web-app.js"></script>
         <script src="https://download.agora.io/sdk/release/AgoraRTC_N-4.18.0.js"></script>
         
@@ -332,7 +347,7 @@ async def get_index():
                 <div class="room-item" onclick="joinExistingRoom('⚽ የካስ ጨዋታ መወያያ (Football Hub)')">
                     <div>
                         <div style="font-weight:bold; color:#00cd63; font-size:15px;">⚽ የካስ ጨዋታ መወያያ (Football Hub) 🏆</div>
-                        <div style="font-size:12px; color:#aaa; margin-top:3px;">የአውሮፓና የሀገር ውስጥ እግር ኳስ ትንተናዎችና ጭቅጭቆች</div>
+                        <div style="font-size:12px; color:#aaa; margin-top:3px;">የአውሮፓና የሀገር ውስጥ እግር ኳስ ትንተናዎችና ጭቆጭቆች</div>
                     </div>
                     <div style="color:#25f4ee; font-size:12px; font-weight:bold; background:rgba(37,244,238,0.1); padding:6px 12px; border-radius:12px;">🎙️ ግባ</div>
                 </div>
@@ -513,18 +528,14 @@ async def get_index():
                     myTelegramId = String(user.id);
                     myUsername = (user.first_name || '') + ' ' + (user.last_name || '');
                     
-                    // በሎቢው ውስጥ ያሉትን መፃፊያዎች መሙላት
                     document.getElementById('lobby-tg-id').value = myTelegramId;
                     document.getElementById('lobby-username').value = myUsername;
                     document.getElementById('wallet-username-label').innerText = myUsername;
                     
-                    // የሪፈራል ሊንክ መፍጠሪያ
                     document.getElementById('referral-link-box').innerText = `https://t.me/MelaSpaceBot?start=ref_${{myTelegramId}}`;
                     
-                    // ከባክአንድ ባላንስ መሳቢያ
                     fetchWalletBalance(myTelegramId);
                 }} else {{
-                    // ለሙከራ (ከቴሌግራም ውጭ ከሆነ)
                     myTelegramId = "12345678";
                     document.getElementById('lobby-tg-id').value = myTelegramId;
                     document.getElementById('lobby-username').value = myUsername;
@@ -698,13 +709,11 @@ async def get_index():
                 box.innerHTML += `<div>🎁 <strong>${{myUsername}}</strong> ለክፍሉ <strong>${{name}}</strong> አበረከተ!</div>`;
                 box.scrollTop = box.scrollHeight;
                 
-                // ኮምቦ ማሳያ
                 const badge = element.querySelector('.combo-badge');
                 badge.style.display = "flex";
                 let count = parseInt(badge.innerText) + 1;
                 badge.innerText = count;
 
-                // አኒሜሽን
                 const animLayer = document.getElementById('animation-stage-layer');
                 const animEmoji = document.getElementById('big-gift-emoji-element');
                 animEmoji.innerText = emoji;
@@ -714,7 +723,7 @@ async def get_index():
 
             function spinTheWheelAction() {{
                 const wheel = document.getElementById('wheel-element');
-                const randomDeg = Math.floor(Math.random() * 360) + 1440; // ቢያንስ 4 ዙር እንዲዞር
+                const randomDeg = Math.floor(Math.random() * 360) + 1440;
                 wheel.style.transform = `rotate(${{randomDeg}}deg)`;
                 setTimeout(() => {{
                     alert("🎉 ድንቅ ነው! 50 ነፃ ኮይን አሸንፈዋል!");
