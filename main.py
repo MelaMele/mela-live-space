@@ -16,7 +16,7 @@ MY_NAME = "Melaku Mebrate Tekle"
 TELEGRAM_BOT_TOKEN = "8708757199:AAFWfFy9ujnZdXEJ2h6CYfzzqh_z27-_kDo"  
 ADMIN_CHAT_ID = "1065443252"               
 
-# ⚠️ Vercel ላይ ራይት ማድረግ እንዲችል የዲቢ ቦታውን ወደ /tmp መቀየር
+# ⚠️ Vercel (Serverless) ላይ ዳታ መጻፍ እንዲችል የዲቢ ቦታውን ወደ /tmp መቀየር
 DB_FILE = "/tmp/mela_space_pro.db"
 
 def init_db():
@@ -45,7 +45,7 @@ def init_db():
 
 init_db()
 
-# 📦 ፒዳንቲክ ሞዴሎች
+# 📦 ፒዳንቲክ ሞዴሎች (Data Schemas)
 class UserRegistration(BaseModel):
     telegram_id: str
     username: str
@@ -61,18 +61,25 @@ class CashOutRequest(BaseModel):
     coins_to_cash: int
     telebirr_phone: str
 
-def send_telegram_message(chat_id, text):
+# ✉️ የቴሌግራም መልዕክት መላኪያ (አዝራር/Button እንዲቀበል ተደርጎ የተሻሻለ)
+def send_telegram_message(chat_id, text, reply_markup=None):
     url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
-    payload = {"chat_id": chat_id, "text": text, "parse_mode": "HTML"}
+    payload = {
+        "chat_id": chat_id, 
+        "text": text, 
+        "parse_mode": "HTML"
+    }
+    if reply_markup:
+        payload["reply_markup"] = reply_markup
+        
     try:
         requests.post(url, json=payload, timeout=5)
     except Exception as e:
         print("Telegram Push Failed:", e)
 
-# --- 🎯 አዲሱ የቴሌግራም ዌብሁክ መቀበያ መስመር (Webhook Endpoint) ---
+# --- 🎯 የቴሌግራም ዌብሁክ መቀበያ መስመር (Webhook Endpoint) ---
 @app.post("/webhook")
 async def telegram_webhook(request: Request):
-    """ በፖሊንግ ምትክ Vercel ላይ ቦቱ በሰከንድ ውስጥ ምላሽ እንዲሰጥ የሚያደርግ ዌብሁክ """
     try:
         update = await request.json()
         if "message" in update and "text" in update["message"]:
@@ -104,10 +111,21 @@ async def telegram_webhook(request: Request):
                     conn.commit()
                 conn.close()
 
-                welcome_text = f"👋 ሰላም {user_first_name}!\n\nእንኳን ወደ <b>Mela Space</b> መጡ።\n\n🎁 ለመጀመሪያ ጊዜ ስለገቡ <b>350 የ Mela ኮይኖች</b> በነፃ ተበርክቶልዎታል።\n\n🔗 <b>ያንተ የሪፈራል ሊንክ፦</b>\n<code>https://t.me/MelaLiveAudioVideoChat_bot?start=ref_{chat_id}</code>\n\n🎙️ አሁኑኑ ክፍሎችን ለመቀላቀል መተግበሪያውን ይክፈቱ!"
-                send_telegram_message(chat_id, welcome_text)
+                welcome_text = f"👋 ሰላም {user_first_name}!\n\nእንኳን ወደ <b>Mela Space</b> መጡ።\n\n🎁 ለመጀመሪያ ጊዜ ስለገቡ <b>350 የ Mela ኮይኖች</b> በነፃ ተበርክቶልዎታል።\n\n🔗 <b>ያንተ የሪፈራል ሊንክ፦</b>\n<code>https://t.me/MelaLiveAudioVideoChat_bot?start=ref_{chat_id}</code>\n\n🎙️ አሁኑኑ ክፍሎችን ለመቀላቀል ከታች ያለውን መተግበሪያ ይክፈቱ!"
+                
+                # 📱 አፑን በቀጥታ የሚከፍተው የቴሌግራም inline ቁልፍ
+                app_button = {
+                    "inline_keyboard": [[
+                        {
+                            "text": "🎙️ Open Mela Space (አፑን ክፈት)",
+                            "web_app": {"url": "https://mela-live-space.vercel.app"} 
+                        }
+                    ]]
+                }
+                
+                send_telegram_message(chat_id, welcome_text, reply_markup=app_button)
 
-            # 🛠️ ለአስተዳዳሪው የሚሰሩ የትዕዛዝ ቁልፎች
+            # 🛠️ ለአስተዳዳሪው የሚሰሩ የትዕዛዝ ቁልፎች (Admin Approval)
             elif chat_id == ADMIN_CHAT_ID:
                 if text.startswith("/approve_deposit"):
                     parts = text.split("_")
@@ -125,7 +143,7 @@ async def telegram_webhook(request: Request):
     except Exception as e:
         return {"status": "error", "message": str(e)}
 
-# --- 🌐 የባክአንድ ኤፒአይ ኤንድፖይንቶች ---
+# --- 🌐 የባክአንድ ኤፒአይ ኤንድፖይንቶች (FastAPI REST Engine) ---
 
 @app.post("/api/register")
 def register_user(user: UserRegistration):
@@ -212,32 +230,11 @@ async def get_index():
             .lobby-title {{ color:#25f4ee; font-size:26px; font-weight:900; text-shadow: 0 0 20px rgba(37,244,238,0.6); }}
             .create-room-box {{ background: rgba(22, 23, 34, 0.7); backdrop-filter: blur(10px); border:1px solid rgba(255,255,255,0.07); border-radius:20px; padding:20px; margin-bottom:20px; box-shadow: 0 8px 32px rgba(0,0,0,0.3); z-index: 2; }}
             .input-field {{ width:100%; background: rgba(47, 48, 61, 0.6); border:1px solid rgba(255,255,255,0.1); border-radius:12px; padding:12px; color:white; font-size:14px; margin-bottom:12px; outline:none; }}
-            .checkbox-container {{ display: flex; align-items: center; gap: 8px; margin-bottom: 12px; font-size: 13px; color: #aaa; }}
             .btn-3d {{ width:100%; background: linear-gradient(135deg, #fe2c55, #ff5574); border: none; color: white; padding: 14px; border-radius: 14px; font-weight: bold; font-size: 16px; cursor: pointer; box-shadow: 0 5px 0px #b01c3a, 0 8px 20px rgba(254,44,85,0.4); transition: all 0.1s ease; transform: translateY(0px); }}
             .btn-3d:active {{ transform: translateY(4px); box-shadow: 0 1px 0px #b01c3a, 0 4px 10px rgba(254,44,85,0.3); }}
             .room-list-title {{ font-size:15px; color:#888; margin-bottom:12px; font-weight:bold; z-index: 2; }}
             .room-item {{ background: rgba(22, 23, 34, 0.6); border:1px solid rgba(255,255,255,0.05); padding:15px; border-radius:16px; display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; cursor:pointer; z-index: 2; }}
             .tab-screen {{ display:none; position:absolute; top:0; left:0; width:100%; height:calc(100% - 70px); background:#060713; z-index:400; padding:20px; overflow-y:auto; }}
-            .page-title {{ font-size:24px; font-weight:800; color:#25f4ee; margin-bottom:20px; text-align:center; }}
-            .info-card {{ background: rgba(22, 23, 34, 0.7); border:1px solid rgba(255,255,255,0.06); border-radius:20px; padding:20px; margin-bottom:15px; text-align:center; }}
-            .app-container {{ display: none; position: relative; width: 100%; height: 100%; flex-direction: column; background: #060713; }}
-            .top-bar {{ display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; border-bottom: 1px solid rgba(255,255,255,0.05); z-index: 10; }}
-            .live-tag {{ background: linear-gradient(45deg, #fe2c55, #ff0033); padding: 5px 12px; border-radius: 20px; font-weight: 800; font-size: 11px; }}
-            .room-name-display {{ font-size:13px; font-weight:bold; color:#25f4ee; background:rgba(37,244,238,0.15); border: 1px solid rgba(37,244,238,0.2); padding:5px 12px; border-radius:20px; }}
-            .video-stage-container {{ width: 90%; height: 130px; background: #11121e; margin: 5px auto; border-radius: 16px; border: 1px solid rgba(255,255,255,0.08); overflow: hidden; position: relative; display: flex; justify-content: center; align-items: center; }}
-            .video-stream-view {{ width: 100%; height: 100%; background: #000; }}
-            .video-placeholder-text {{ position: absolute; font-size: 12px; color: #555; pointer-events: none; }}
-            .stage-area {{ flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: 5px; z-index: 5; overflow-y: auto; }}
-            .host-section {{ text-align: center; margin-bottom: 8px; position: relative; }}
-            .host-avatar {{ width: 60px; height: 60px; border-radius: 50%; background: #111; border: 3px solid #fe2c55; display: flex; align-items: center; justify-content: center; font-size: 28px; margin: 0 auto 3px auto; box-shadow: 0 0 15px rgba(254,44,85,0.3); }}
-            .host-badge {{ position: absolute; top: 0; right: 5px; background: #ffdd67; color: #000; font-size: 9px; padding: 2px 5px; border-radius: 10px; font-weight: bold; }}
-            .seats-grid {{ display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: 100%; max-width: 360px; margin-bottom: 5px; }}
-            .utility-bar {{ display: flex; flex-direction: column; gap: 6px; width: 100%; background: rgba(255,255,255,0.02); padding: 8px; border-top: 1px solid rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.05); z-index: 10; }}
-            .button-row {{ display: flex; justify-content: space-around; width: 100%; gap: 5px; flex-wrap: wrap; }}
-            .util-btn-3d {{ background: rgba(22, 23, 34, 0.8); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 6px 8px; border-radius: 10px; font-size: 11px; font-weight: bold; cursor: pointer; flex: 1; min-width: 70px; text-align: center; box-shadow: 0 3px 0px rgba(0,0,0,0.5); transition: all 0.05s ease; }}
-            .slider-fx-container {{ display: flex; flex-direction: column; gap: 6px; width: 95%; margin: 0 auto; }}
-            .volume-control-box {{ display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 11px; color: #aaa; }}
-            .volume-slider {{ flex: 1; -webkit-appearance: none; background: rgba(255,255,255,0.1); height: 5px; border-radius: 3px; outline: none; }}
             .bottom-nav {{ position:absolute; bottom:0; left:0; width:100%; height:70px; background: rgba(22, 23, 34, 0.85); backdrop-filter: blur(15px); border-top:1px solid rgba(255,255,255,0.06); display:flex; justify-content:space-around; align-items:center; z-index:1000; }}
             .nav-item {{ display:flex; flex-direction:column; align-items:center; color:#666b86; font-size:11px; font-weight:600; cursor:pointer; }}
             .nav-item.active {{ color:#25f4ee; }}
