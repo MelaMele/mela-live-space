@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Mela Multi-Guest Space</title>
-    <!-- Agora Web SDK -->
     <script src="https://download.agora.io/sdk/release/AgoraRTC_N-4.18.0.js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -22,7 +21,6 @@
         
         .host-section { text-align: center; margin-bottom: 15px; width: 100%; }
         .host-video-box { width: 130px; height: 130px; border-radius: 15px; background: #161722; border: 3px solid #fe2c55; display: flex; align-items: center; justify-content: center; font-size: 40px; margin: 0 auto 5px auto; box-shadow: 0 0 20px rgba(254, 44, 85, 0.4); overflow: hidden; position: relative; }
-        .video-stream { width: 100%; height: 100%; object-fit: cover; position: absolute; top:0; left:0; }
 
         /* Multi-seat Layout */
         .seats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; width: 100%; max-width: 360px; padding: 10px; }
@@ -67,59 +65,54 @@
 </head>
 <body>
     <div class="app-container">
-        <!-- Top Navigation -->
         <div class="top-bar">
             <div class="live-tag">🔴 LIVE • Mela Space</div>
             <div class="coin-badge">🪙 <span id="my-coins">150</span> Mela</div>
         </div>
 
-        <!-- Stage Configuration -->
         <div class="stage-area">
             <div class="host-section">
                 <div class="host-video-box" id="host-video-container">🎙️</div>
                 <div style="font-size:13px; font-weight:bold; margin-top:4px;">Melaku (Host)</div>
             </div>
 
-            <!-- Multi-guest seats (6 Interactive Slots) -->
             <div class="seats-grid" id="guests-grid">
                 <div class="seat-node" onclick="joinSeat(1)">
-                    <div class="seat-video-box" id="seat-1">🔊</div>
-                    <div class="seat-name">ዮናስ</div>
+                    <div class="seat-video-box empty" id="seat-1">➕</div>
+                    <div class="seat-name">ባዶ ወንበር 1</div>
                 </div>
                 <div class="seat-node" onclick="joinSeat(2)">
-                    <div class="seat-video-box" id="seat-2">🔊</div>
-                    <div class="seat-name">አልማዝ</div>
+                    <div class="seat-video-box empty" id="seat-2">➕</div>
+                    <div class="seat-name">ባዶ ወንበር 2</div>
                 </div>
                 <div class="seat-node" onclick="joinSeat(3)">
                     <div class="seat-video-box empty" id="seat-3">➕</div>
-                    <div class="seat-name">ባዶ ወንበር</div>
+                    <div class="seat-name">ባዶ ወንበር 3</div>
                 </div>
                 <div class="seat-node" onclick="joinSeat(4)">
-                    <div class="seat-video-box" id="seat-4">🔇</div>
-                    <div class="seat-name">ሳሙኤል</div>
+                    <div class="seat-video-box empty" id="seat-4">➕</div>
+                    <div class="seat-name">ባዶ ወንበር 4</div>
                 </div>
                 <div class="seat-node" onclick="joinSeat(5)">
                     <div class="seat-video-box empty" id="seat-5">➕</div>
-                    <div class="seat-name">ባዶ ወንበር</div>
+                    <div class="seat-name">ባዶ ወንበር 5</div>
                 </div>
                 <div class="seat-node" onclick="joinSeat(6)">
                     <div class="seat-video-box empty" id="seat-6">➕</div>
-                    <div class="seat-name">ባዶ ወንበር</div>
+                    <div class="seat-name">ባዶ ወንበር 6</div>
                 </div>
             </div>
         </div>
 
-        <!-- Tab Layout for Interactions -->
         <div class="tabs-container">
             <div class="tabs-menu">
-                <div class="tab-btn active" onclick="switchTab('chat')">💬 የቡድን ውይይት</div>
-                <div class="tab-btn" onclick="switchTab('games')">🎮 ጨዋታዎች (ቢንጎ/ዊል)</div>
-                <div class="tab-btn" onclick="switchTab('whisper')">🤫 ሹክሹክታ</div>
+                <div class="tab-btn active" onclick="switchTab(event, 'chat')">💬 የቡድን ውይይት</div>
+                <div class="tab-btn" onclick="switchTab(event, 'games')">🎮 ጨዋታዎች</div>
+                <div class="tab-btn" onclick="switchTab(event, 'whisper')">🤫 ሹክሹክታ</div>
             </div>
             
             <div id="tab-chat" class="tab-content active">
-                <div class="chat-msg"><b>ዮናስ:</b> ሰላም እንዴት ናችሁ? 🙌</div>
-                <div class="chat-msg chat-system">🎉 ሳሙኤል 🎁 ለ Melaku "🦁 አንበሳ" በስጦታ ሰጠ!</div>
+                <div class="chat-msg"><b>ሲስተም:</b> ወደ Mela Space እንኳን በሰላም መጡ! 🙌</div>
             </div>
             
             <div id="tab-games" class="tab-content">
@@ -134,7 +127,6 @@
             </div>
         </div>
 
-        <!-- Interactive Control Panel -->
         <div class="bottom-controls">
             <button class="action-btn" id="main-join-btn" onclick="promptSeatSelection()">🎙️ መድረክ ላይ ውጣ</button>
             <div class="icon-tray">
@@ -144,14 +136,11 @@
             </div>
         </div>
 
-        <!-- Donation Panel -->
         <div class="gift-drawer" id="gift-panel">
             <div class="drawer-line" onclick="toggleGiftDrawer()"></div>
             <h4 style="margin-bottom:12px; font-size:13px; color:#aaa;">🎯 ስጦታው ለሚያገኘው ሰው:</h4>
             <div class="target-select">
                 <div class="target-opt selected">Melaku (Host)</div>
-                <div class="target-opt">ዮናስ</div>
-                <div class="target-opt">አልማዝ</div>
             </div>
             <div class="gift-grid">
                 <div class="gift-card selected"><div>🌹</div><div style="font-size:12px;margin-top:2px;">ሮዝ</div><div style="font-size:10px;color:#00cd63;">5 ብር</div></div>
@@ -161,18 +150,39 @@
         </div>
     </div>
 
-    <!-- Real-time Media Engine Logics -->
     <script>
         let agoraClient = AgoraRTC.createClient({ mode: "live", codec: "vp8" });
         let localTracks = { videoTrack: null, audioTrack: null };
         let isMusicPlaying = false;
         let bgMusic = null;
 
+        // አፑ ሲከፈት የሆስቱን ካሜራ ለማስጀመር ቁልፍ መፍጠር
+        window.addEventListener('DOMContentLoaded', () => {
+            let hostContainer = document.getElementById("host-video-container");
+            hostContainer.innerHTML = "<button onclick='startHostStream()' style='background:#fe2c55; border:none; color:white; padding:6px 12px; border-radius:20px; font-size:11px; font-weight:bold; cursor:pointer;'>ካሜራ ክፈት</button>";
+        });
+
+        async function startHostStream() {
+            try {
+                localTracks.audioTrack = await AgoraRTC.createMicrophoneAudioTrack();
+                localTracks.videoTrack = await AgoraRTC.createCameraVideoTrack();
+                
+                let hostContainer = document.getElementById("host-video-container");
+                hostContainer.innerHTML = ""; 
+                
+                localTracks.videoTrack.play(hostContainer);
+                alert("የሆስት ካሜራ እና ማይክሮፎን በትክክል ተከፍቷል!");
+            } catch (err) {
+                alert("ካሜራውን ለመክፈት አልተቻለም። እባክዎ የብሮውዘር ፈቃድ ይስጡ!");
+                console.error(err);
+            }
+        }
+
         // Tab Switching Engine
-        function switchTab(tabName) {
+        function switchTab(event, tabName) {
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-            event.target.classList.add('active');
+            event.currentTarget.classList.add('active');
             document.getElementById(`tab-${tabName}`).classList.add('active');
         }
 
@@ -181,20 +191,16 @@
             let mode = confirm("መድረክ ላይ ለመውጣት የሚፈልጉትን ሚዲያ ይምረጡ:\n[OK] = በቪዲዮ እና በማይክ ለመግባት\n[Cancel] = በማይክሮፎን (ድምፅ) ብቻ ለመግባት");
             
             try {
-                // Audio is always required
                 localTracks.audioTrack = await AgoraRTC.createMicrophoneAudioTrack();
-                
                 let targetContainer = document.getElementById(`seat-${seatId}`);
                 targetContainer.classList.remove('empty');
-                targetContainer.innerHTML = ""; // Clear icon
+                targetContainer.innerHTML = ""; 
 
                 if (mode) {
-                    // Video + Audio requested
                     localTracks.videoTrack = await AgoraRTC.createCameraVideoTrack();
                     localTracks.videoTrack.play(targetContainer);
                     alert(`ወንበር ${seatId} ላይ በቪዲዮና በማይክ ስርጭትዎ ተጀምሯል!`);
                 } else {
-                    // Audio only requested
                     targetContainer.innerHTML = "🎙️";
                     alert(`ወንበር ${seatId} ላይ በማይክሮፎን ብቻ ተቀላቅለዋል!`);
                 }
@@ -202,8 +208,7 @@
                 document.getElementById("main-join-btn").innerText = "🚪 ከመድረክ ውረድ";
                 document.getElementById("main-join-btn").onclick = leaveSeat;
             } catch (err) {
-                alert("የካሜራ ወይም የማይክሮፎን ፈቃድ ማግኘት አልተቻለም! እባክዎ ፍቃድ ይስጡ።");
-                console.error(err);
+                alert("የካሜራ ወይም የማይክሮፎን ፈቃድ ማግኘት አልተቻለም!");
             }
         }
 
@@ -218,36 +223,30 @@
             location.reload();
         }
 
-        // SFX Module (የድምፅ ውጤቶች)
+        // SFX Module
         function playEffect(effectName) {
-            // እነዚህ የድምፅ ፋይሎች በVercel public/sounds/ ውስጥ መኖር አለባቸው
-            let audio = new Audio(`/sounds/${effectName}.mp3`);
-            audio.play().catch(() => {
-                alert("👏 ጭብጨባ! (የድምፅ ፋይሉን ለማጫወት በVercel public/sounds/applause.mp3 ላይ መጫን አለበት።)");
-            });
+            let audioUrl = 'https://actions.google.com/sounds/v1/crowds/human_applause.ogg';
+            let audio = new Audio(audioUrl);
+            audio.play().catch(() => alert("እባክዎ መጀመሪያ ስክሪኑን አንድ ጊዜ ይጫኑ!"));
         }
 
         function toggleBackgroundMusic() {
             if (!isMusicPlaying) {
-                bgMusic = new Audio('/sounds/background.mp3');
+                bgMusic = new Audio('https://actions.google.com/sounds/v1/weather/rain_heavy_loud.ogg'); 
                 bgMusic.loop = true;
                 bgMusic.play().then(() => {
                     isMusicPlaying = true;
-                    alert("🎵 የጀርባ ሙዚቃ ተጀምሯል።");
-                }).catch(() => {
-                    alert("🎵 የጀርባ ሙዚቃ ስራ ላይ ነው! (ለመስራት public/sounds/background.mp3 ፋይል ያስፈልጋል)");
-                });
+                    alert("🎵 የጀርባ ድምፅ ተጀምሯል።");
+                }).catch(() => alert("እባክዎ መጀመሪያ ስክሪኑን ይጫኑ!"));
             } else {
                 bgMusic.pause();
                 isMusicPlaying = false;
-                alert("🎵 የጀርባ ሙዚቃ ቆሟል።");
+                alert("🎵 የጀርባ ድምፅ ቆሟል።");
             }
         }
 
-        // Live Games Module Launcher
         function triggerGame(gameName) {
             alert(`የ ${gameName} ቦት መጫወቻ ገጽ አሁን ይከፈታል!`);
-            // እዚህ ላይ ከዚህ በፊት የሰራኸውን የቢንጎ ወይም የLucky wheel መጫወቻ ሊንክ ማገናኘት ትችላለህ
         }
 
         function toggleGiftDrawer() {
