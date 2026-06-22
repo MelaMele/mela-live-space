@@ -1,23 +1,21 @@
 import os
 import requests
-import threading
-import time
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 from typing import Optional
 
-app = FastAPI(title="Mela Space - Ultimate Video & Voice Ecosystem")
+app = FastAPI(title="Mela Space - Vercel Serverless Webhook Ecosystem")
 
 # 📱 የባለቤትነት መብት እና መለያዎች
 MY_TELEBIRR_NUMBER = "0913064239"  
 MY_NAME = "Melaku Mebrate Tekle"         
 
-# 🤖 የቴሌግራም ኮንፊገሬชั่น (በአዲሱ ቶክንህ እና አይዲህ ቀጥታ ተተክቷል)
+# 🤖 የቴሌግራም ኮንፊገሬชั่น (Hardcoded for your bot)
 TELEGRAM_BOT_TOKEN = "8708757199:AAFWfFy9ujnZdXEJ2h6CYfzzqh_z27-_kDo"  
 ADMIN_CHAT_ID = "1065443252"               
 
-# 📂 ዳታቤዝ-አልባ የIn-Memory መዋቅር (Vercel ወይም ማናቸውም ሰርቨር ላይ እንዳይበላሽ)
+# 📂 ዳታቤዝ-አልባ የIn-Memory መዋቅር
 USERS_MEMORY = {}
 
 class UserRegistration(BaseModel):
@@ -35,7 +33,6 @@ class CashOutRequest(BaseModel):
     coins_to_cash: int
     telebirr_phone: str
 
-# --- 🤖 የቴሌግራም ቦት ጀርባ ሰራተኛ (Telegram Bot Engine) ---
 def push_bot_message(chat_id, text):
     url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
     try:
@@ -43,59 +40,44 @@ def push_bot_message(chat_id, text):
     except Exception as e:
         print("Bot Notification Error:", e)
 
-def run_telegram_polling():
-    offset = 0
-    print("=========================================")
-    print(f"🤖 Loaded BOT_TOKEN: {TELEGRAM_BOT_TOKEN[:10]}... (Hardcoded)")
-    print(f"👤 Loaded ADMIN_ID: {ADMIN_CHAT_ID}")
-    print("=========================================")
-    
-    # ከቴሌግራም ጋር ያለውን ግንኙነት መፈተኛ
+# --- 🌐 1. የቴሌግራም ዌብሁክ መቀበያ መስመር (Webhook Endpoint) ---
+@app.post("/api/webhook")
+async def telegram_webhook(request: Request):
     try:
-        test_url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/getMe"
-        test_res = requests.get(test_url, timeout=5).json()
-        if test_res.get("ok"):
-            print(f"✅ Telegram Connection Success! Bot Name: @{test_res['result']['username']}")
-        else:
-            print(f"❌ Telegram Error: {test_res.get('description')}")
+        update = await request.json()
+        if "message" in update and "text" in update["message"]:
+            msg = update["message"]
+            chat_id = str(msg["chat"]["id"])
+            text = msg["text"].strip()
+            first_name = msg["from"].get("first_name", "ተጠቃሚ")
+
+            if text.startswith("/start"):
+                ref_id = None
+                if " " in text:
+                    parts = text.split(" ")
+                    if len(parts) > 1 and parts[1].startswith("ref_"):
+                        ref_id = parts[1].replace("ref_", "")
+
+                if chat_id not in USERS_MEMORY:
+                    USERS_MEMORY[chat_id] = {"username": first_name, "coins": 350}
+                    if ref_id and ref_id in USERS_MEMORY and ref_id != chat_id:
+                        USERS_MEMORY[ref_id]["coins"] += 20
+                        push_bot_message(ref_id, f"🎉 <b>የሪፈራል ስጦታ!</b>\n\n👤 {first_name} በእርስዎ ሊንክ ስለገባ 20 ነፃ 🪙 ተጨምሮልዎታል!")
+
+                welcome_msg = f"👋 ሰላም {first_name}!\n\nእንኳን ወደ <b>Mela Space</b> በሰላም መጡ。\n\n🎁 መተግበሪያውን ስለከፈቱ <b>350 ነፃ ኮይኖች</b> ተሰጥተውዎታል።\n\n🔗 <b>የእርስዎ መጋበዣ (Referral) ሊንክ፦</b>\n<code>https://t.me/MelaSpaceBot?start=ref_{chat_id}</code>"
+                push_bot_message(chat_id, welcome_msg)
+                
+        return {"status": "ok"}
     except Exception as e:
-        print(f"❌ Network Error connecting to Telegram: {e}")
+        print("Webhook Processing Error:", e)
+        return {"status": "error", "details": str(e)}
 
-    print("🤖 Mela Telegram Bot successfully hooked and running...")
-    while True:
-        try:
-            url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/getUpdates?offset={offset}&timeout=10"
-            updates = requests.get(url, timeout=12).json()
-            if "result" in updates:
-                for update in updates["result"]:
-                    offset = update["update_id"] + 1
-                    if "message" in update and "text" in update["message"]:
-                        msg = update["message"]
-                        chat_id = str(msg["chat"]["id"])
-                        text = msg["text"].strip()
-                        first_name = msg["from"].get("first_name", "ተጠቃሚ")
-
-                        if text.startswith("/start"):
-                            ref_id = None
-                            if " " in text:
-                                parts = text.split(" ")
-                                if len(parts) > 1 and parts[1].startswith("ref_"):
-                                    ref_id = parts[1].replace("ref_", "")
-
-                            if chat_id not in USERS_MEMORY:
-                                USERS_MEMORY[chat_id] = {"username": first_name, "coins": 350}
-                                if ref_id and ref_id in USERS_MEMORY and ref_id != chat_id:
-                                    USERS_MEMORY[ref_id]["coins"] += 20
-                                    push_bot_message(ref_id, f"🎉 <b>የሪፈራል ስጦታ!</b>\n\n👤 {first_name} በእርስዎ ሊንክ ስለገባ 20 ነፃ 🪙 ተጨምሮልዎታል!")
-
-                            welcome_msg = f"👋 ሰላም {first_name}!\n\nእንኳን ወደ <b>Mela Space</b> በሰላም መጡ。\n\n🎁 መተግበሪያውን ስለከፈቱ <b>350 ነፃ ኮይኖች</b> ተሰጥተውዎታል።\n\n🔗 <b>የእርስዎ መጋበዣ (Referral) ሊንክ፦</b>\n<code>https://t.me/MelaSpaceBot?start=ref_{chat_id}</code>"
-                            push_bot_message(chat_id, welcome_msg)
-        except Exception as e:
-            print("Polling Inner Error:", e)
-            time.sleep(5)
-
-# ቦቱን ከFastAPI ጎን ለጎን ማስነሳት
-threading.Thread(target=run_telegram_polling, daemon=True).start()
+# --- 🔄 2. ዌብሁኩን ለቴሌግራም ማስተዋወቂያና መፈተኛ መስመር ---
+@app.get("/api/setup-webhook")
+def setup_webhook(url: str):
+    telegram_url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/setWebhook?url={url}&drop_pending_updates=true"
+    res = requests.get(telegram_url).json()
+    return res
 
 # --- 🌐 የባክአንድ ኤፒአይ ኤንድፖይንቶች ---
 
@@ -149,11 +131,9 @@ async def get_index():
             * {{ box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, sans-serif; }}
             body, html {{ width: 100%; height: 100%; overflow: hidden; background: #060713; color: #fff; }}
             
-            /* ✨ የጀርባ ኒዮን ማብሪያዎች */
             .bg-glow {{ position: absolute; width: 300px; height: 300px; background: radial-gradient(circle, rgba(37,244,238,0.15) 0%, rgba(0,0,0,0) 70%); top: -50px; left: -50px; z-index: 1; pointer-events: none; }}
             .bg-glow-right {{ position: absolute; width: 300px; height: 300px; background: radial-gradient(circle, rgba(254,44,85,0.12) 0%, rgba(0,0,0,0) 70%); bottom: 50px; right: -50px; z-index: 1; pointer-events: none; }}
 
-            /* 🚪 ሎቢ ገጽ */
             .lobby-container {{ position: absolute; top:0; left:0; width:100%; height:calc(100% - 70px); background:#060713; z-index:500; display:flex; flex-direction:column; padding:20px; overflow-y:auto; }}
             .lobby-header {{ text-align:center; margin: 10px 0; z-index: 2; }}
             .lobby-title {{ color:#25f4ee; font-size:26px; font-weight:900; text-shadow: 0 0 20px rgba(37,244,238,0.6); }}
@@ -163,7 +143,6 @@ async def get_index():
             
             .checkbox-container {{ display: flex; align-items: center; gap: 8px; margin-bottom: 12px; font-size: 13px; color: #aaa; }}
             
-            /* 🔥 3D በተኖች */
             .btn-3d {{ 
                 width:100%; 
                 background: linear-gradient(135deg, #fe2c55, #ff5574); 
@@ -183,12 +162,10 @@ async def get_index():
             .room-list-title {{ font-size:15px; color:#888; margin-bottom:12px; font-weight:bold; z-index: 2; }}
             .room-item {{ background: rgba(22, 23, 34, 0.6); border:1px solid rgba(255,255,255,0.05); padding:15px; border-radius:16px; display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; cursor:pointer; z-index: 2; }}
 
-            /* 🗂️  ታብ ገፆች */
             .tab-screen {{ display:none; position:absolute; top:0; left:0; width:100%; height:calc(100% - 70px); background:#060713; z-index:400; padding:20px; overflow-y:auto; }}
             .page-title {{ font-size:24px; font-weight:800; color:#25f4ee; margin-bottom:20px; text-align:center; }}
             .info-card {{ background: rgba(22, 23, 34, 0.7); border:1px solid rgba(255,255,255,0.06); border-radius:20px; padding:20px; margin-bottom:15px; text-align:center; }}
             
-            /* 🎙️ 🎬 ዋናው የውስጥ ሩም */
             .app-container {{ display: none; position: relative; width: 100%; height: 100%; flex-direction: column; background: #060713; }}
             .top-bar {{ display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; border-bottom: 1px solid rgba(255,255,255,0.05); z-index: 10; }}
             .live-tag {{ background: linear-gradient(45deg, #fe2c55, #ff0033); padding: 5px 12px; border-radius: 20px; font-weight: 800; font-size: 11px; }}
@@ -196,7 +173,6 @@ async def get_index():
             
             .voice-counter-badge {{ background: rgba(0, 205, 99, 0.2); border: 1px solid #00cd63; color: #00ff7f; font-size: 12px; font-weight: bold; padding: 4px 10px; border-radius: 12px; display: none; }}
 
-            /* 📺 የቪዲዮ ማሳያ መስኮት */
             .video-stage-container {{ width: 90%; height: 130px; background: #11121e; margin: 5px auto; border-radius: 16px; border: 1px solid rgba(255,255,255,0.08); overflow: hidden; position: relative; display: flex; justify-content: center; align-items: center; }}
             .video-stream-view {{ width: 100%; height: 100%; background: #000; }}
             .video-placeholder-text {{ position: absolute; font-size: 12px; color: #555; pointer-events: none; }}
@@ -206,13 +182,11 @@ async def get_index():
             .host-avatar {{ width: 60px; height: 60px; border-radius: 50%; background: #111; border: 3px solid #fe2c55; display: flex; align-items: center; justify-content: center; font-size: 28px; margin: 0 auto 3px auto; box-shadow: 0 0 15px rgba(254,44,85,0.3); }}
             .host-badge {{ position: absolute; top: 0; right: 5px; background: #ffdd67; color: #000; font-size: 9px; padding: 2px 5px; border-radius: 10px; font-weight: bold; }}
 
-            /* 🪑 የመቀመጫ ግሪዶች */
             .seats-grid {{ display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: 100%; max-width: 360px; margin-bottom: 5px; }}
             .seat-circle {{ width: 46px; height: 46px; border-radius: 50%; background: #161722; border: 2px solid #25f4ee; display: flex; align-items: center; justify-content: center; font-size: 16px; margin: 0 auto 3px auto; cursor: pointer; position: relative; }}
             .seat-circle.empty {{ border-color: rgba(255,255,255,0.15); background: rgba(255,255,255,0.03); color: #555; }}
             .seat-name {{ font-size: 11px; color: #bbb; text-align:center; }}
 
-            /* 🎛️ የመቆጣጠሪያ ቁልፎች */
             .utility-bar {{ display: flex; flex-direction: column; gap: 6px; width: 100%; background: rgba(255,255,255,0.02); padding: 8px; border-top: 1px solid rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.05); z-index: 10; }}
             .button-row {{ display: flex; justify-content: space-around; width: 100%; gap: 5px; flex-wrap: wrap; }}
             
@@ -238,23 +212,19 @@ async def get_index():
             .volume-slider {{ flex: 1; -webkit-appearance: none; background: rgba(255,255,255,0.1); height: 5px; border-radius: 3px; outline: none; }}
             .volume-slider::-webkit-slider-thumb {{ -webkit-appearance: none; appearance: none; width: 14px; height: 14px; border-radius: 50%; background: #25f4ee; cursor: pointer; }}
 
-            /* 💬 የቀጥታ ቻት ክልል */
             .chat-area {{ height: 95px; width: 100%; padding: 10px; background: linear-gradient(transparent, rgba(6,7,19,0.98)); overflow-y: auto; font-size: 12px; display: flex; flex-direction: column; gap: 5px; z-index: 10; scroll-behavior: smooth; }}
             
-            /* ✍️ የፅሁፍ መፃፊያ ባር */
             .chat-input-container {{ display: flex; padding: 8px 15px; background: #0b0c1e; border-top: 1px solid rgba(255,255,255,0.05); z-index: 12; gap: 10px; align-items: center; }}
             .chat-input {{ flex: 1; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 10px 15px; color: #fff; font-size: 13px; outline: none; }}
             .btn-send-text {{ background: #25f4ee; border: none; color: #060713; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; cursor: pointer; }}
 
             .bottom-controls {{ display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; background: #060713; z-index: 10; border-top: 1px solid rgba(255,255,255,0.05); }}
             
-            /* 🧭 የታችኛው ዋና ሜኑ */
             .bottom-nav {{ position:absolute; bottom:0; left:0; width:100%; height:70px; background: rgba(22, 23, 34, 0.85); backdrop-filter: blur(15px); border-top:1px solid rgba(255,255,255,0.06); display:flex; justify-content:space-around; align-items:center; z-index:1000; }}
             .nav-item {{ display:flex; flex-direction:column; align-items:center; color:#666b86; font-size:11px; font-weight:600; cursor:pointer; }}
             .nav-item.active {{ color:#25f4ee; }}
             .nav-icon {{ font-size:22px; margin-bottom:4px; }}
 
-            /* 🎁 የስጦታዎች Overlay */
             .gift-overlay {{ display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:2000; align-items:flex-end; }}
             .gift-tray {{ width:100%; background:#10111e; border-top: 2px solid rgba(255,255,255,0.1); border-radius:24px 24px 0 0; padding:20px; }}
             .gift-grid {{ display:grid; grid-template-columns: repeat(4, 1fr); gap:12px; margin-bottom: 15px; }}
@@ -264,11 +234,9 @@ async def get_index():
             
             .combo-badge {{ position: absolute; top: -8px; right: -8px; background: linear-gradient(45deg, #ff007f, #fe2c55); color: white; border-radius: 50%; width: 22px; height: 22px; font-size: 11px; display: flex; align-items: center; justify-content: center; font-weight: 900; box-shadow: 0 0 10px #fe2c55; display: none; }}
 
-            /* 🎡 Wheel UI */
             .wheel-box {{ width: 100%; background: #10111e; padding: 25px; border-radius: 24px 24px 0 0; text-align: center; color: white; }}
             .wheel-graphic {{ width: 160px; height: 160px; border-radius: 50%; border: 8px solid #25f4ee; margin: 15px auto; display: flex; align-items: center; justify-content: center; font-size: 40px; font-weight: bold; background: conic-gradient(#fe2c55 0% 25%, #00ff7f 25% 50%, #00bfff 50% 75%, #ffdd67 75% 100%); transition: transform 3s cubic-bezier(0.1, 0.8, 0.1, 1); }}
 
-            /* 🎬 አኒሜሽን ንብርብር */
             .cinematic-stage {{ display:none; position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:2500; align-items:center; justify-content:center; }}
             .big-gift-anim {{ font-size:120px; animation: cinematicBlast 1.2s forwards cubic-bezier(0.175, 0.885, 0.32, 1.275); }}
             @keyframes cinematicBlast {{
@@ -427,7 +395,7 @@ async def get_index():
                 <div class="button-row">
                     <button class="util-btn-3d" style="border-color:#ffdd67; color:#ffdd67;" onclick="alert('ዕድል መሞከሪያው በቅርቡ ይጀምራል!')">🎰 Lucky Draw</button>
                     <button class="util-btn-3d" style="border-color:#00ff7f; color:#00ff7f;" onclick="alert('ቢንጎ በቅርቡ ይዘጋጃል!')">🎲 Bingo</button>
-                    <button class="util-btn-3d" style="border-color:#ff007f; color:#ff007f;" onclick="triggerSecretWhisper()">🤫 ሹክሹክታ (5 🪙)</button>
+                    <button class="util-btn-3d" style="border-color:#ff007f; color:#ff007f;" onclick="alert('የሹክሹክታ ጥያቄ ተልኳል!')">🤫 ሹክሹክታ (5 🪙)</button>
                     <button class="util-btn-3d" onclick="playRealSound('applause')">👏 ጭብጨባ</button>
                     <button class="util-btn-3d" onclick="playRealSound('laughter')">😂 ሳቅ</button>
                 </div>
@@ -491,7 +459,6 @@ async def get_index():
         <div class="cinematic-stage" id="animation-stage-layer"><div class="big-gift-anim" id="big-gift-emoji-element">👑</div></div>
 
         <script>
-            // 🚀 የቴሌግራም ዌብ አፕ አጀማመር እና የዳታ መሳቢያ ሎጂክ
             const tg = window.Telegram.WebApp;
             tg.ready();
             tg.expand();
@@ -508,9 +475,6 @@ async def get_index():
             
             let voiceTimerInterval = null;
             let secondsOnMic = 0;
-            let lastGiftTime = 0;
-            let comboCount = 0;
-            let currentComboGift = "";
 
             let seatsData = {{ 
                 1: {{ name: "ባዶ", status: "empty" }},
@@ -521,7 +485,6 @@ async def get_index():
                 6: {{ name: "ባዶ", status: "empty" }}
             }};
 
-            // ገጹ ሲጫን የቴሌግራም ተጠቃሚ መረጃን በራስ-ሰር መሳቢያ
             window.onload = function() {{
                 if (tg.initDataUnsafe && tg.initDataUnsafe.user) {{
                     const user = tg.initDataUnsafe.user;
@@ -531,7 +494,6 @@ async def get_index():
                     document.getElementById('lobby-tg-id').value = myTelegramId;
                     document.getElementById('lobby-username').value = myUsername;
                     document.getElementById('wallet-username-label').innerText = myUsername;
-                    
                     document.getElementById('referral-link-box').innerText = `https://t.me/MelaSpaceBot?start=ref_${{myTelegramId}}`;
                     
                     fetchWalletBalance(myTelegramId);
