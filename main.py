@@ -72,7 +72,7 @@ def run_telegram_polling():
                                     USERS_MEMORY[ref_id]["coins"] += 20
                                     push_bot_message(ref_id, f"🎉 <b>የሪፈራል ስጦታ!</b>\n\n👤 {first_name} በእርስዎ ሊንክ ስለገባ 20 ነፃ 🪙 ተጨምሮልዎታል!")
 
-                            welcome_msg = f"👋 ሰላም {first_name}!\n\nእንኳን ወደ <b>Mela Space</b> በሰላም መጡ።\n\n🎁 መተግበሪያውን ስለከፈቱ <b>350 ነፃ ኮይኖች</b> ተሰጥተውዎታል።\n\n🔗 <b>የእርስዎ መጋበዣ (Referral) ሊንክ፦</b>\n<code>https://t.me/MelaSpaceBot?start=ref_{chat_id}</code>"
+                            welcome_msg = f"👋 ሰላም {first_name}!\n\nእንኳን ወደ <b>Mela Space</b> በሰላም መጡ。\n\n🎁 መተግበሪያውን ስለከፈቱ <b>350 ነፃ ኮይኖች</b> ተሰጥተውዎታል።\n\n🔗 <b>የእርስዎ መጋበዣ (Referral) ሊንክ፦</b>\n<code>https://t.me/MelaSpaceBot?start=ref_{chat_id}</code>"
                             push_bot_message(chat_id, welcome_msg)
         except Exception as e:
             time.sleep(2)
@@ -125,6 +125,7 @@ async def get_index():
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
         <title>Mela Ultimate Pro Space - Created by Melaku Mebrate Tekle</title>
         
+        <script src="https://telegram.org/js/telegram-web-app.js"></script>
         <script src="https://download.agora.io/sdk/release/AgoraRTC_N-4.18.0.js"></script>
         
         <style>
@@ -170,7 +171,7 @@ async def get_index():
             .page-title {{ font-size:24px; font-weight:800; color:#25f4ee; margin-bottom:20px; text-align:center; }}
             .info-card {{ background: rgba(22, 23, 34, 0.7); border:1px solid rgba(255,255,255,0.06); border-radius:20px; padding:20px; margin-bottom:15px; text-align:center; }}
             
-            /* 🎙️ 🎬 ዋናው የውስጥ ሩም (ቪዲዮ የሚታይበት ክልል ጨምሮ) */
+            /* 🎙️ 🎬 ዋናው የውስጥ ሩም */
             .app-container {{ display: none; position: relative; width: 100%; height: 100%; flex-direction: column; background: #060713; }}
             .top-bar {{ display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; border-bottom: 1px solid rgba(255,255,255,0.05); z-index: 10; }}
             .live-tag {{ background: linear-gradient(45deg, #fe2c55, #ff0033); padding: 5px 12px; border-radius: 20px; font-weight: 800; font-size: 11px; }}
@@ -178,7 +179,7 @@ async def get_index():
             
             .voice-counter-badge {{ background: rgba(0, 205, 99, 0.2); border: 1px solid #00cd63; color: #00ff7f; font-size: 12px; font-weight: bold; padding: 4px 10px; border-radius: 12px; display: none; }}
 
-            /* 📺 የቪዲዮ ማሳያ መስኮት (Video Stage) */
+            /* 📺 የቪዲዮ ማሳያ መስኮት */
             .video-stage-container {{ width: 90%; height: 130px; background: #11121e; margin: 5px auto; border-radius: 16px; border: 1px solid rgba(255,255,255,0.08); overflow: hidden; position: relative; display: flex; justify-content: center; align-items: center; }}
             .video-stream-view {{ width: 100%; height: 100%; background: #000; }}
             .video-placeholder-text {{ position: absolute; font-size: 12px; color: #555; pointer-events: none; }}
@@ -473,6 +474,11 @@ async def get_index():
         <div class="cinematic-stage" id="animation-stage-layer"><div class="big-gift-anim" id="big-gift-emoji-element">👑</div></div>
 
         <script>
+            // 🚀 የቴሌግራም ዌብ አፕ አጀማመር እና የዳታ መሳቢያ ሎጂክ
+            const tg = window.Telegram.WebApp;
+            tg.ready();
+            tg.expand();
+
             let client = AgoraRTC.createClient({{ mode: "rtc", codec: "vp8" }});
             let localAudioTrack = null; 
             let localVideoTrack = null; 
@@ -490,245 +496,275 @@ async def get_index():
             let currentComboGift = "";
 
             let seatsData = {{ 
-                1: {{name:"ባዶ", active:false}}, 
-                2: {{name:"ባዶ", active:false}}, 
-                3: {{name:"ባዶ", active:false}}, 
-                4: {{name:"ባዶ", active:false}}, 
-                5: {{name:"ባዶ", active:false}}, 
-                6: {{name:"ባዶ", active:false}} 
+                1: {{ name: "ባዶ", status: "empty" }},
+                2: {{ name: "ባዶ", status: "empty" }},
+                3: {{ name: "ባዶ", status: "empty" }},
+                4: {{ name: "ባዶ", status: "empty" }},
+                5: {{ name: "ባዶ", status: "empty" }},
+                6: {{ name: "ባዶ", status: "empty" }}
             }};
 
-            async function syncUserWithBackend() {{
-                const tgId = document.getElementById("lobby-tg-id").value.trim();
-                const uName = document.getElementById("lobby-username").value.trim();
-                if(!tgId || !uName) return;
-                
-                myTelegramId = tgId;
-                myUsername = uName;
-
-                let response = await fetch('/api/register', {{
-                    method: 'POST',
-                    headers: {{ 'Content-Type': 'application/json' }},
-                    body: JSON.stringify({{ telegram_id: tgId, username: uName }})
-                }});
-                let data = await response.json();
-                myCoins = data.coins;
-
-                document.getElementById("referral-link-box").innerText = "https://t.me/MelaSpaceBot?start=ref_" + myTelegramId;
-            }}
-
-            async function switchTab(tabName) {{
-                document.getElementById("lobby-screen").style.display = "none";
-                document.getElementById("wallet-screen").style.display = "none";
-                document.getElementById("referral-screen").style.display = "none";
-                document.getElementById("nav-home").classList.remove("active");
-                document.getElementById("nav-wallet").classList.remove("active");
-                document.getElementById("nav-ref").classList.remove("active");
-                
-                if(tabName === 'home') {{
-                    document.getElementById("lobby-screen").style.display = "flex";
-                    document.getElementById("nav-home").classList.add("active");
-                }} else if(tabName === 'wallet') {{
-                    document.getElementById("wallet-screen").style.display = "block";
-                    document.getElementById("nav-wallet").classList.add("active");
-                    if(myTelegramId) {{
-                        let res = await fetch(`/api/wallet/${{myTelegramId}}`);
-                        let data = await res.json();
-                        myCoins = data.coins;
-                        document.getElementById("wallet-username-label").innerText = data.username;
-                    }}
-                    document.getElementById("wallet-coin-balance").innerText = myCoins;
-                }} else if(tabName === 'referral') {{
-                    document.getElementById("referral-screen").style.display = "block";
-                    document.getElementById("nav-ref").classList.add("active");
-                    document.getElementById("referral-link-box").innerText = "https://t.me/MelaSpaceBot?start=ref_" + (myTelegramId ? myTelegramId : "{ADMIN_CHAT_ID}");
+            // ገጹ ሲጫን የቴሌግራም ተጠቃሚ መረጃን በራስ-ሰር መሳቢያ
+            window.onload = function() {{
+                if (tg.initDataUnsafe && tg.initDataUnsafe.user) {{
+                    const user = tg.initDataUnsafe.user;
+                    myTelegramId = String(user.id);
+                    myUsername = (user.first_name || '') + ' ' + (user.last_name || '');
+                    
+                    // በሎቢው ውስጥ ያሉትን መፃፊያዎች መሙላት
+                    document.getElementById('lobby-tg-id').value = myTelegramId;
+                    document.getElementById('lobby-username').value = myUsername;
+                    document.getElementById('wallet-username-label').innerText = myUsername;
+                    
+                    // የሪፈራል ሊንክ መፍጠሪያ
+                    document.getElementById('referral-link-box').innerText = `https://t.me/MelaSpaceBot?start=ref_${{myTelegramId}}`;
+                    
+                    // ከባክአንድ ባላንስ መሳቢያ
+                    fetchWalletBalance(myTelegramId);
+                }} else {{
+                    // ለሙከራ (ከቴሌግራም ውጭ ከሆነ)
+                    myTelegramId = "12345678";
+                    document.getElementById('lobby-tg-id').value = myTelegramId;
+                    document.getElementById('lobby-username').value = myUsername;
+                    document.getElementById('referral-link-box').innerText = `https://t.me/MelaSpaceBot?start=ref_12345678`;
                 }}
-            }}
+                renderSeatsGrid();
+            }};
 
-            async function createNewRoomAction() {{
-                const tgId = document.getElementById("lobby-tg-id").value.trim();
-                const uName = document.getElementById("lobby-username").value.trim();
-                const rName = document.getElementById("lobby-roomname").value.trim();
-                if(!tgId || !uName || !rName) {{ alert("እባክዎ መረጃዎችን በሙሉ ያስገቡ!"); return; }}
+            function switchTab(tab) {{
+                document.getElementById('lobby-screen').style.display = tab === 'home' ? 'flex' : 'none';
+                document.getElementById('wallet-screen').style.display = tab === 'wallet' ? 'block' : 'none';
+                document.getElementById('referral-screen').style.display = tab === 'referral' ? 'block' : 'none';
                 
-                await syncUserWithBackend();
-                currentRoomName = rName;
-                
-                if(document.getElementById("lobby-is-vip").checked) {{
-                    let pin = prompt("ለቪአይፒ ክፍሉ መቆለፊያ ባለ 4 አሃዝ PIN ያስገቡ፦");
-                    if(!pin) return;
-                    currentRoomName = "🔒 [VIP] " + rName;
-                }}
-                launchRoom();
+                document.getElementById('nav-home').classList.toggle('active', tab === 'home');
+                document.getElementById('nav-wallet').classList.toggle('active', tab === 'wallet');
+                document.getElementById('nav-ref').classList.toggle('active', tab === 'referral');
             }}
 
-            async function joinExistingRoom(roomName) {{
-                const tgId = document.getElementById("lobby-tg-id").value.trim();
-                const uName = document.getElementById("lobby-username").value.trim();
-                if(!tgId || !uName) {{ alert("እባክዎ መጀመሪያ የቴሌግራም ID እና ስምዎን ከላይ ይሙሉ!"); return; }}
-                
-                await syncUserWithBackend();
-                currentRoomName = roomName; 
-                launchRoom();
-            }}
-
-            function launchRoom() {{
-                document.getElementById("main-nav-bar").style.display = "none";
-                document.getElementById("lobby-screen").style.display = "none";
-                document.getElementById("room-screen").style.display = "flex";
-                document.getElementById("active-room-title").innerText = currentRoomName;
-                document.getElementById("room-host-name").innerText = myUsername;
-                
-                const audio = document.getElementById("bg-kirar-audio");
-                audio.volume = 0.15;
-                audio.play().catch(e => console.log("Audio ready."));
-
-                appendChat("🚀 Mela System", ` ወደ "${{currentRoomName}}" ክፍል በሰላም መጡ!`, "color:#25f4ee; font-weight:bold;");
-                renderSeats();
-            }}
-
-            async function submitPaymentToBackend() {{
-                let amt = document.getElementById("purchase-coin-amount").value;
-                let tx = document.getElementById("purchase-tx-id").value.trim();
-                if(!myTelegramId) {{ alert("እባክዎ መጀመሪያ ሎቢው ላይ ID ቁጥርዎን ያስገቡ!"); return; }}
-                if(!amt || !tx) {{ alert("እባክዎ ሁሉንም ሳጥኖች ይሙሉ!"); return; }}
-
-                let res = await fetch('/api/purchase-coins', {{
-                    method: 'POST',
-                    headers: {{ 'Content-Type': 'application/json' }},
-                    body: JSON.stringify({{ telegram_id: myTelegramId, amount_coins: parseInt(amt), telebirr_tx_id: tx }})
-                }});
-                let data = await res.json();
-                alert(data.message);
-            }}
-
-            async function submitCashOutToBackend() {{
-                let amt = document.getElementById("cashout-coin-amount").value;
-                let phone = document.getElementById("cashout-phone").value.trim();
-                if(!myTelegramId) {{ alert("እባክዎ መጀመሪያ መለያዎን ያስገቡ!"); return; }}
-                if(!amt || !phone) {{ alert("እባክዎ ሁሉንም ሳጥኖች ይሙሉ!"); return; }}
-
-                let res = await fetch('/api/cash-out', {{
-                    method: 'POST',
-                    headers: {{ 'Content-Type': 'application/json' }},
-                    body: JSON.stringify({{ telegram_id: myTelegramId, coins_to_cash: parseInt(amt), telebirr_phone: phone }})
-                }});
-                let data = await res.json();
-                alert(data.message);
-            }}
-
-            function renderSeats() {{
-                const container = document.getElementById("seats-container");
+            function renderSeatsGrid() {{
+                const container = document.getElementById('seats-container');
                 container.innerHTML = "";
                 for (let i = 1; i <= 6; i++) {{
-                    let seat = seatsData[i];
-                    let isEmpty = seat.name === "ባዶ";
-                    container.innerHTML += `
-                        <div onclick="clickSeat(${{i}})">
-                            <div class="seat-circle ${{isEmpty ? 'empty' : ''}}">
-                                ${{isEmpty ? i : '🎙️'}}
-                            </div>
-                            <div class="seat-name">${{seat.name}}</div>
+                    const seat = seatsData[i];
+                    const isSeatEmpty = seat.status === "empty";
+                    const seatDiv = document.createElement('div');
+                    seatDiv.className = "seat-container";
+                    seatDiv.innerHTML = `
+                        <div class="seat-circle ${{isSeatEmpty ? 'empty' : ''}}" onclick="occupySeatAction(${{i}})">
+                            ${{isSeatEmpty ? i : '🎙️'}}
                         </div>
+                        <div class="seat-name">${{seat.name}}</div>
                     `;
+                    container.appendChild(seatDiv);
                 }}
             }}
 
-            function clickSeat(num) {{
-                if(currentSeat !== null) {{ seatsData[currentSeat] = {{name: "ባዶ", active: false}}; }}
-                currentSeat = num;
-                seatsData[num] = {{name: myUsername, active: true}};
-                renderSeats();
-                appendChat("🎙️ System", ` መድረክ ቁጥር ${{num}}ን በስኬት ይዘዋል!`, "color:#ffdd67;");
+            function createNewRoomAction() {{
+                const roomName = document.getElementById('lobby-roomname').value || "Mela Space Room";
+                myUsername = document.getElementById('lobby-username').value || "አባል";
+                myTelegramId = document.getElementById('lobby-tg-id').value || "00000";
+                
+                document.getElementById('lobby-screen').style.display = 'none';
+                document.getElementById('main-nav-bar').style.display = 'none';
+                document.getElementById('room-screen').style.display = 'flex';
+                
+                document.getElementById('active-room-title').innerText = "ክፍል: " + roomName;
+                document.getElementById('room-host-name').innerText = myUsername;
+                
+                document.getElementById('bg-kirar-audio').play();
             }}
 
-            function requestSeatAuto() {{
-                for(let i=1; i<=6; i++) {{ if(seatsData[i].name === "ባዶ") {{ clickSeat(i); break; }} }}
-            }}
-
-            async function toggleVideoCamera() {{
-                const videoBtn = document.getElementById("video-toggle-btn");
-                const placeholder = document.getElementById("video-status-placeholder");
-                if (!localVideoTrack) {{
-                    try {{
-                        placeholder.innerText = "🔄 ካሜራ በመነሳት ላይ...";
-                        localVideoTrack = await AgoraRTC.createCameraVideoTrack();
-                        placeholder.style.display = "none";
-                        localVideoTrack.play("local-video-stream-box");
-                        videoBtn.innerText = "🛑 ካሜራ አጥፋ";
-                    }} catch (err) {{ placeholder.innerText = "❌ ስህተት ተፈጥሯል"; }}
-                }} else {{
-                    localVideoTrack.stop(); localVideoTrack.close(); localVideoTrack = null;
-                    placeholder.style.display = "block"; videoBtn.innerText = "📹 ካሜራ አብራ";
-                }}
-            }}
-
-            function startVoiceMonetizationLoop() {{
-                voiceTimerInterval = setInterval(() => {{
-                    secondsOnMic += 10;
-                    document.getElementById("voice-timer-display").innerText = `⏱️ On Mic: ${{secondsOnMic}}s`;
-                    if(myCoins >= 2) {{
-                        myCoins -= 2;
-                        appendChat("👛 Wallet", " ማይክራፎን ስለተጠቀሙ 2 🪙 ተቀንሷል", "color:#ffaa00; font-size:11px;");
-                    }} else {{ toggleMic(true); }}
-                }}, 10000);
-            }}
-
-            function toggleMic(forceMute = false) {{
-                const micBtn = document.getElementById("mic-toggle-btn");
-                if(micBtn.innerText === "🔊" || forceMute) {{
-                    micBtn.innerText = "🔇"; clearInterval(voiceTimerInterval);
-                }} else {{
-                    micBtn.innerText = "🔊"; startVoiceMonetizationLoop();
-                }}
-            }}
-
-            function triggerSecretWhisper() {{
-                let target = prompt("የእርሱ ስም?");
-                let whisperMsg = prompt("ሚስጥራዊ መልእክት?");
-                if(myCoins >= 5 && whisperMsg) {{
-                    myCoins -= 5; appendChat("🤫 ሹክሹክታ", whisperMsg, "color:#ff007f;");
-                }}
-            }}
-
-            function processGiftSend(name, cost, emoji, cardElement) {{
-                if(myCoins >= cost) {{
-                    myCoins -= cost; appendChat("🎁 ስጦታ", `${{myUsername}} ${{emoji}} አበረከተ!`, "color:#00ff7f;");
-                }} else {{ alert("በቂ ኮይን የለዎትም!"); }}
-            }}
-
-            function openGiftTray() {{ document.getElementById("gift-modal-overlay").style.display = "flex"; }}
-            function closeGiftTray() {{ document.getElementById("gift-modal-overlay").style.display = "none"; }}
-            function openWheelModal() {{ document.getElementById("gift-modal-overlay").style.display = "flex"; }}
-            
-            function spinTheWheelAction() {{
-                document.getElementById("wheel-element").style.transform = "rotate(1440deg)";
-                setTimeout(() => {{ alert("50 ኮይን አሸንፈዋል!"); closeGiftTray(); }}, 3000);
-            }}
-
-            function sendTextMessage() {{
-                const input = document.getElementById("text-msg-input");
-                if(!input.value.trim()) return;
-                appendChat(myUsername, input.value.trim()); input.value = "";
-            }}
-
-            function appendChat(user, msg, style="") {{
-                const box = document.getElementById("chat-box");
-                box.innerHTML += `<div style="${{style}}"><b>${{user}}:</b> ${{msg}}</div>`;
-                box.scrollTop = box.scrollHeight;
-            }}
-
-            function copyReferralLink() {{
-                navigator.clipboard.writeText(document.getElementById("referral-link-box").innerText); alert("ተገልብጧል!");
+            function joinExistingRoom(roomName) {{
+                document.getElementById('lobby-roomname').value = roomName;
+                createNewRoomAction();
             }}
 
             function exitRoom() {{
-                document.getElementById("room-screen").style.display = "none";
-                document.getElementById("main-nav-bar").style.display = "flex";
-                document.getElementById("lobby-screen").style.display = "flex";
+                document.getElementById('room-screen').style.display = 'none';
+                document.getElementById('lobby-screen').style.display = 'flex';
+                document.getElementById('main-nav-bar').style.display = 'flex';
+                document.getElementById('bg-kirar-audio').pause();
+                resetMicTimer();
+            }}
+
+            function occupySeatAction(num) {{
+                if (currentSeat === num) {{
+                    seatsData[num] = {{ name: "ባዶ", status: "empty" }};
+                    currentSeat = null;
+                    resetMicTimer();
+                    alert("ከመቀመጫ ቁጥር " + num + " ወርደዋል!");
+                }} else {{
+                    if(currentSeat !== null) {{
+                        seatsData[currentSeat] = {{ name: "ባዶ", status: "empty" }};
+                    }}
+                    currentSeat = num;
+                    seatsData[num] = {{ name: myUsername, status: "occupied" }};
+                    startMicTimer();
+                    alert("መቀመጫ ቁጥር " + num + " ን ይዘዋል!");
+                }}
+                renderSeatsGrid();
+            }}
+
+            function requestSeatAuto() {{
+                for(let i=1; i<=6; i++) {{
+                    if(seatsData[i].status === "empty") {{
+                        occupySeatAction(i);
+                        break;
+                    }}
+                }}
+            }}
+
+            function startMicTimer() {{
+                resetMicTimer();
+                document.getElementById('voice-timer-display').style.display = "block";
+                voiceTimerInterval = setInterval(() => {{
+                    secondsOnMic++;
+                    document.getElementById('voice-timer-display').innerText = `⏱️ On Mic: ${{secondsOnMic}}s`;
+                }}, 1000);
+            }}
+
+            function resetMicTimer() {{
+                if(voiceTimerInterval) clearInterval(voiceTimerInterval);
+                secondsOnMic = 0;
+                document.getElementById('voice-timer-display').innerText = `⏱️ On Mic: 0s`;
+            }}
+
+            function toggleMic() {{
+                const btn = document.getElementById('mic-toggle-btn');
+                if(btn.innerText === "🔊") {{
+                    btn.innerText = "🔇";
+                    btn.style.background = "#333";
+                }} else {{
+                    btn.innerText = "🔊";
+                    btn.style.background = "rgba(255,255,255,0.06)";
+                }}
+            }}
+
+            function toggleVideoCamera() {{
+                const btn = document.getElementById('video-toggle-btn');
+                const placeholder = document.getElementById('video-status-placeholder');
+                const box = document.getElementById('local-video-stream-box');
+                if(btn.innerText === "📹 ካሜራ አብራ") {{
+                    btn.innerText = "📹 ካሜራ አጥፋ";
+                    placeholder.style.display = "none";
+                    box.style.background = "#222";
+                }} else {{
+                    btn.innerText = "📹 ካሜራ አብራ";
+                    placeholder.style.display = "block";
+                    box.style.background = "#000";
+                }}
+            }}
+
+            function sendTextMessage() {{
+                const input = document.getElementById('text-msg-input');
+                const box = document.getElementById('chat-box');
+                if(input.value.trim() !== "") {{
+                    const div = document.createElement('div');
+                    div.innerHTML = `<span style="color:#25f4ee; font-weight:bold;">${{myUsername}}:</span> ${{input.value}}`;
+                    box.appendChild(div);
+                    input.value = "";
+                    box.scrollTop = box.scrollHeight;
+                }}
+            }}
+
+            function playRealSound(type) {{
+                const aud = document.getElementById(type === 'applause' ? 'snd-applause' : 'snd-laughter');
+                if(aud) {{ aud.currentTime = 0; aud.play(); }}
+                const box = document.getElementById('chat-box');
+                box.innerHTML += `<div>🎭 <em>${{type === 'applause' ? '👏 አጨበጨቡ' : '😂 ሳቁ'}}</em></div>`;
+                box.scrollTop = box.scrollHeight;
+            }}
+
+            function openGiftTray() {{
+                document.getElementById('gift-modal-overlay').style.display = "flex";
+                document.getElementById('gift-tray-zone').style.display = "block";
+                document.getElementById('wheel-zone').style.display = "none";
+            }}
+
+            function openWheelModal() {{
+                document.getElementById('gift-modal-overlay').style.display = "flex";
+                document.getElementById('gift-tray-zone').style.display = "none";
+                document.getElementById('wheel-zone').style.display = "block";
+            }}
+
+            function closeGiftTray() {{
+                document.getElementById('gift-modal-overlay').style.display = "none";
+            }}
+
+            function processGiftSend(name, cost, emoji, element) {{
+                const box = document.getElementById('chat-box');
+                box.innerHTML += `<div>🎁 <strong>${{myUsername}}</strong> ለክፍሉ <strong>${{name}}</strong> አበረከተ!</div>`;
+                box.scrollTop = box.scrollHeight;
+                
+                // ኮምቦ ማሳያ
+                const badge = element.querySelector('.combo-badge');
+                badge.style.display = "flex";
+                let count = parseInt(badge.innerText) + 1;
+                badge.innerText = count;
+
+                // አኒሜሽን
+                const animLayer = document.getElementById('animation-stage-layer');
+                const animEmoji = document.getElementById('big-gift-emoji-element');
+                animEmoji.innerText = emoji;
+                animLayer.style.display = "flex";
+                setTimeout(() => {{ animLayer.style.display = "none"; }}, 1200);
+            }}
+
+            function spinTheWheelAction() {{
+                const wheel = document.getElementById('wheel-element');
+                const randomDeg = Math.floor(Math.random() * 360) + 1440; // ቢያንስ 4 ዙር እንዲዞር
+                wheel.style.transform = `rotate(${{randomDeg}}deg)`;
+                setTimeout(() => {{
+                    alert("🎉 ድንቅ ነው! 50 ነፃ ኮይን አሸንፈዋል!");
+                }}, 3100);
+            }}
+
+            function copyReferralLink() {{
+                const linkText = document.getElementById('referral-link-box').innerText;
+                navigator.clipboard.writeText(linkText);
+                alert("የመጋበዣ ሊንክዎ ኮፒ ተደርጓል!");
+            }}
+
+            function fetchWalletBalance(tgId) {{
+                fetch(`/api/wallet/${{tgId}}`)
+                    .then(res => res.json())
+                    .then(data => {{
+                        myCoins = data.coins || 350;
+                        document.getElementById('wallet-coin-balance').innerText = myCoins;
+                    }}).catch(e => {{
+                        document.getElementById('wallet-coin-balance').innerText = "350";
+                    }});
+            }}
+
+            function submitPaymentToBackend() {{
+                const amount = document.getElementById('purchase-coin-amount').value;
+                const txId = document.getElementById('purchase-tx-id').value;
+                if(!amount || !txId) return alert("እባክዎ ሁሉንም መረጃ ያሟሉ!");
+                
+                fetch('/api/purchase-coins', {{
+                    method: 'POST',
+                    headers: {{ 'Content-Type': 'application/json' }},
+                    body: JSON.stringify({{ telegram_id: myTelegramId, amount_coins: parseInt(amount), telebirr_tx_id: txId }})
+                }}).then(res => res.json()).then(data => alert(data.message));
+            }}
+
+            function submitCashOutToBackend() {{
+                const amount = document.getElementById('cashout-coin-amount').value;
+                const phone = document.getElementById('cashout-phone').value;
+                if(!amount || !phone) return alert("እባክዎ ሁሉንም መረጃ ያሟሉ!");
+                
+                fetch('/api/cash-out', {{
+                    method: 'POST',
+                    headers: {{ 'Content-Type': 'application/json' }},
+                    body: JSON.stringify({{ telegram_id: myTelegramId, coins_to_cash: parseInt(amount), telebirr_phone: phone }})
+                }}).then(res => res.json()).then(data => alert(data.message));
+            }}
+
+            function adjustMusicVolume(val) {{
+                document.getElementById('bg-kirar-audio').volume = val / 100;
             }}
         </script>
     </body>
     </html>
     """
-    return html_content
+    return HTMLResponse(content=html_content)
