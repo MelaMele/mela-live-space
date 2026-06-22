@@ -13,9 +13,10 @@ app = FastAPI(title="Mela Space - Ultimate Video & Voice Ecosystem")
 MY_TELEBIRR_NUMBER = "0913064239"  
 MY_NAME = "Melaku Mebrate Tekle"         
 
-# 🤖 የቴሌግራም ኮንፊገሬሽን
-TELEGRAM_BOT_TOKEN = "8327536456:AAHn6AqMUIayCjUUTF5up8cICR_4BvjbiKs"  
-ADMIN_CHAT_ID = "1065443252"               
+# 🤖 የቴሌግራም ኮንፊገሬሽን (ከEnvironment Variables በራስ-ሰር እንዲያነብ ተደርጓል)
+# ማሳሰቢያ፦ ሲስተምህ ላይ BOT_TOKEN እና ADMIN_ID በሚል ስም ሴት አድርጋቸው። ካልሆነ እዚህ ላይ ቀጥታ መተካት ትችላለህ።
+TELEGRAM_BOT_TOKEN = os.environ.get("BOT_TOKEN", "8708757199:AAFWfFy9ujnZdXEJ2h6CYfzzqh_z27-_kDo")  
+ADMIN_CHAT_ID = os.environ.get("ADMIN_ID", "1065443252")               
 
 # 📂 ዳታቤዝ-አልባ የIn-Memory መዋቅር (Vercel ወይም ማናቸውም ሰርቨር ላይ እንዳይበላሽ)
 USERS_MEMORY = {}
@@ -125,6 +126,7 @@ async def get_index():
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
         <title>Mela Ultimate Pro Space - Created by Melaku Mebrate Tekle</title>
         
+        <!-- 📱 የቴሌግራም ሚኒ አፕ ስክሪፕት እዚህ ጋር ተጨምሯል -->
         <script src="https://telegram.org/js/telegram-web-app.js"></script>
         <script src="https://download.agora.io/sdk/release/AgoraRTC_N-4.18.0.js"></script>
         
@@ -303,7 +305,7 @@ async def get_index():
                 <input type="text" id="lobby-roomname" class="input-field" placeholder="የክፍሉን ስም ያስገቡ...">
                 <div class="checkbox-container">
                     <input type="checkbox" id="lobby-is-vip">
-                    <label for="lobby-is-vip">🔒 እንደ VIP (የግል ሚስጥራዊ ክፍል) ፍጠር</label>
+                    <label for="lobby-is-vip">🔒 እንደ VIP (የግል ሚስጥራዊ ክፍል) ፍተር</label>
                 </div>
                 <button class="btn-3d" onclick="createNewRoomAction()">🚀 አዲስ ክፍል ፍጠር</button>
                 <button class="util-btn-3d" style="width:100%; margin-top:12px; border-color:#00ff7f; color:#00ff7f;" onclick="openWheelModal()">🎡 ዕለታዊ ዕድል ማሽከርከሪያ (Daily Wheel)</button>
