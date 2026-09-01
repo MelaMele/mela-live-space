@@ -4,7 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Mela Multi-Guest Space</title>
-    <script src="https://meet.jit.si/external_api.js?v=1.0.3"></script>
+    <!-- Telegram WebApp SDK -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <!-- Jitsi Meet API -->
+    <script src="https://meet.jit.si/external_api.js"></script>
+    
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body, html {
@@ -12,13 +16,13 @@
             background: #080810; font-family: 'Segoe UI', Roboto, sans-serif; color: #fff;
         }
         .app-container { position: relative; width: 100%; height: 100%; display: flex; flex-direction: column; }
-        .top-bar { display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; z-index: 10; background: rgba(8,8,16,0.8); }
+        .top-bar { display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; z-index: 10; background: rgba(8,8,16,0.9); border-bottom: 1px solid rgba(255,255,255,0.05); }
         .live-tag { background: #fe2c55; padding: 5px 12px; border-radius: 20px; font-weight: bold; font-size: 12px; }
-        .coin-badge { background: rgba(255, 255, 255, 0.1); padding: 5px 12px; border-radius: 20px; font-size: 13px; }
+        .coin-badge { background: rgba(255, 255, 255, 0.1); padding: 5px 12px; border-radius: 20px; font-size: 13px; font-weight: bold; color: #00cd63; }
         
         /* Interactive Live Stage Frame */
         .stage-area { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10px; position: relative; }
-        #jitsi-meet-container { width: 100%; height: 100%; max-height: 380px; border-radius: 16px; overflow: hidden; background: #161722; border: 2px solid #25f4ee; box-shadow: 0 0 15px rgba(37, 244, 238, 0.2); position: relative; }
+        #jitsi-meet-container { width: 100%; height: 100%; min-height: 280px; border-radius: 16px; overflow: hidden; background: #161722; border: 2px solid #25f4ee; box-shadow: 0 0 15px rgba(37, 244, 238, 0.2); position: relative; }
         
         /* Multi-seat Touch Buttons Style */
         .mode-selection-overlay { text-align: center; padding: 20px; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 15px; }
@@ -28,32 +32,38 @@
         .btn-video { background: linear-gradient(135deg, #fe2c55, #bd1c40); }
 
         /* Dynamic Tabs for Games and Private Whispers */
-        .tabs-container { background: #161722; border-radius: 15px 15px 0 0; margin-top: auto; border-top: 1px solid rgba(255,255,255,0.05); }
+        .tabs-container { background: #161722; border-radius: 15px 15px 0 0; margin-top: auto; border-top: 1px solid rgba(255,255,255,0.05); display: flex; flex-direction: column; height: 160px; }
         .tabs-menu { display: flex; border-bottom: 1px solid rgba(255,255,255,0.1); }
         .tab-btn { flex: 1; padding: 10px; text-align: center; font-size: 12px; cursor: pointer; color: #888; transition: 0.3s; }
         .tab-btn.active { color: #25f4ee; font-weight: bold; border-bottom: 2px solid #25f4ee; }
-        .tab-content { display: none; height: 100px; padding: 10px; overflow-y: auto; font-size: 13px; }
-        .tab-content.active { display: block; }
+        .tab-content { display: none; flex: 1; padding: 10px; overflow-y: auto; font-size: 13px; }
+        .tab-content.active { display: flex; flex-direction: column; }
 
         /* Live Chat Box styles */
-        .chat-msg { margin-bottom: 4px; animation: fadeIn 0.3s ease; }
-        .game-placeholder { text-align: center; color: #aaa; padding-top: 15px; }
+        .chat-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 5px; margin-bottom: 5px; }
+        .chat-msg { animation: fadeIn 0.3s ease; }
+        .chat-input-box { display: flex; gap: 5px; }
+        .chat-input { flex: 1; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 8px 12px; color: #fff; font-size: 12px; outline: none; }
+        .chat-send-btn { background: #25f4ee; color: #080810; border: none; border-radius: 50%; width: 32px; height: 32px; font-weight: bold; cursor: pointer; }
+        
+        .game-placeholder { text-align: center; color: #aaa; padding-top: 10px; }
 
         /* Control Tray */
-        .bottom-controls { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: #080810; box-shadow: 0 -5px 15px rgba(0,0,0,0.3); }
-        .action-btn { background: #fe2c55; border: none; color: white; padding: 12px 20px; border-radius: 25px; font-weight: bold; font-size: 13px; cursor: pointer; }
+        .bottom-controls { display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; background: #080810; box-shadow: 0 -5px 15px rgba(0,0,0,0.3); }
+        .action-btn { background: #fe2c55; border: none; color: white; padding: 10px 18px; border-radius: 25px; font-weight: bold; font-size: 12px; cursor: pointer; }
         .icon-tray { display: flex; gap: 10px; }
-        .icon-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.05); width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: pointer; user-select: none; }
+        .icon-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.05); width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: pointer; user-select: none; }
         .icon-btn:active { background: rgba(255,255,255,0.3); }
 
         /* Slide Drawer */
-        .gift-drawer { position: absolute; bottom: -100%; left: 0; width: 100%; background: #161722; border-radius: 24px 24px 0 0; padding: 20px; transition: 0.4s ease; z-index: 20; }
+        .gift-drawer { position: fixed; bottom: -100%; left: 0; width: 100%; background: #161722; border-radius: 24px 24px 0 0; padding: 20px; transition: 0.4s ease; z-index: 100; border-top: 1px solid rgba(255,255,255,0.1); }
         .gift-drawer.open { bottom: 0; }
-        .drawer-line { width: 40px; height: 4px; background: rgba(255,255,255,0.2); border-radius: 10px; margin: 0 auto 15px auto; }
+        .drawer-line { width: 40px; height: 4px; background: rgba(255,255,255,0.2); border-radius: 10px; margin: 0 auto 15px auto; cursor: pointer; }
         .gift-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 15px; }
-        .gift-card { background: #2f303d; border-radius: 12px; padding: 12px; text-align: center; cursor: pointer; border: 1px solid transparent; }
-        .gift-card.selected { border-color: #00cd63; }
-        .send-gift-btn { width: 100%; background: #00cd63; color: white; border: none; padding: 14px; border-radius: 12px; font-weight: bold; cursor: pointer; }
+        .gift-card { background: #2f303d; border-radius: 12px; padding: 12px; text-align: center; cursor: pointer; border: 2px solid transparent; }
+        .gift-card.selected { border-color: #00cd63; background: rgba(0,205,99,0.1); }
+        .send-gift-btn { width: 100%; background: #00cd63; color: white; border: none; padding: 12px; border-radius: 12px; font-weight: bold; cursor: pointer; }
+        
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
@@ -61,7 +71,7 @@
     <div class="app-container">
         <div class="top-bar">
             <div class="live-tag">🔴 LIVE • Mela Space</div>
-            <div class="coin-badge">🪙 <span id="my-coins">150</span> Mela</div>
+            <div class="coin-badge">🪙 <span id="my-coins">---</span> Mela</div>
         </div>
 
         <div class="stage-area">
@@ -88,18 +98,24 @@
             </div>
             
             <div id="tab-chat" class="tab-content active">
-                <div class="chat-msg"><b>ሲስተም:</b> ወደ Mela Multi-Guest Space እንኳን በሰላም መጡ! 🙌</div>
+                <div class="chat-list" id="chat-messages-container">
+                    <div class="chat-msg"><b style="color:#25f4ee;">ሲስተም:</b> ወደ Mela Live Space እንኳን በሰላም መጡ! 🙌</div>
+                </div>
+                <div class="chat-input-box">
+                    <input type="text" id="chat-text-input" class="chat-input" placeholder="መልዕክት ይፃፉ..." onkeypress="if(event.key==='Enter') sendChatMessage()">
+                    <button class="chat-send-btn" onclick="sendChatMessage()">➔</button>
+                </div>
             </div>
             
             <div id="tab-games" class="tab-content">
                 <div class="game-placeholder">
-                    <button class="action-btn" style="background:#00cd63; margin-bottom:5px;" onclick="triggerGame('Lucky Wheel')">🎡 ዕድለኛ እሽክርክሪት ክፈት</button>
-                    <button class="action-btn" style="background:#25f4ee; color:#000;" onclick="triggerGame('Bingo')">🎲 ቢንጎ ጨዋታ ጀምር</button>
+                    <button class="action-btn" style="background:#00cd63; margin-bottom:8px; width:80%;" onclick="triggerGame('Lucky Wheel')">🎡 ዕድለኛ እሽክርክሪት ክፈት</button><br>
+                    <button class="action-btn" style="background:#25f4ee; color:#000; width:80%;" onclick="triggerGame('Bingo')">🎲 ቢንጎ ጨዋታ ጀምር</button>
                 </div>
             </div>
             
             <div id="tab-whisper" class="tab-content">
-                <div class="chat-msg" style="color:#aaa;"><i>ለተሳታፊዎች በግል ሚስጥራዊ መልዕክት ለመላክ...</i></div>
+                <div class="chat-msg" style="color:#aaa; text-align:center; padding-top:20px;"><i>🤫 ለተሳታፊዎች በግል ሚስጥራዊ መልዕክት ለመላክ (በቅርቡ)...</i></div>
             </div>
         </div>
 
@@ -114,40 +130,81 @@
 
         <div class="gift-drawer" id="gift-panel">
             <div class="drawer-line" onclick="toggleGiftDrawer()"></div>
-            <h4 style="margin-bottom:12px; font-size:13px; color:#aaa;">🎯 ስጦታው ለሚያገኘው ሰው:</h4>
+            <h4 style="margin-bottom:12px; font-size:13px; color:#aaa;">🎯 ለመላክ የሚፈልጉትን ስጦታ ይምረጡ:</h4>
             <div class="gift-grid">
-                <div class="gift-card selected"><div>🌹</div><div style="font-size:12px;margin-top:2px;">ሮዝ</div><div style="font-size:10px;color:#00cd63;">5 ብር</div></div>
-                <div class="gift-card"><div>🦁</div><div style="font-size:12px;margin-top:2px;">አንበሳ</div><div style="font-size:10px;color:#00cd63;">100 ብር</div></div>
+                <div class="gift-card selected" onclick="selectGift(this, '🌹 ሮዝ', 10)">
+                    <div>🌹</div>
+                    <div style="font-size:12px; margin-top:2px;">ሮዝ</div>
+                    <div style="font-size:10px; color:#00cd63;">10 🪙</div>
+                </div>
+                <div class="gift-card" onclick="selectGift(this, '☕ ጀበና ቡና', 50)">
+                    <div>☕</div>
+                    <div style="font-size:12px; margin-top:2px;">ቡና</div>
+                    <div style="font-size:10px; color:#00cd63;">50 🪙</div>
+                </div>
+                <div class="gift-card" onclick="selectGift(this, '🦁 አንበሳ', 200)">
+                    <div>🦁</div>
+                    <div style="font-size:12px; margin-top:2px;">አንበሳ</div>
+                    <div style="font-size:10px; color:#00cd63;">200 🪙</div>
+                </div>
             </div>
-            <button class="send-gift-btn" onclick="sendGift()">💳 በቴሌብር ገዝተህ ላክ</button>
+            <button class="send-gift-btn" onclick="sendGift()">🎁 ስጦታውን ላክ</button>
         </div>
     </div>
 
     <script>
+        // 🤖 የቴሌግራም ሚኒ-አፕ ማዋቀር
+        const tg = window.Telegram?.WebApp;
+        if (tg) {
+            tg.ready();
+            tg.expand();
+        }
+
         let api = null;
         let isMusicPlaying = false;
         let bgMusic = null;
+        
+        let telegramUser = {
+            id: tg?.initDataUnsafe?.user?.id ? String(tg.initDataUnsafe.user.id) : "guest_user",
+            name: tg?.initDataUnsafe?.user?.first_name || "Mela Guest"
+        };
 
-        // Jitsi Multi-seat Stream Core Engine (Optimized for Portrait)
+        let selectedGiftData = { name: "🌹 ሮዝ", cost: 10 };
+
+        // በገጹ መጀመሪያ ላይ የኮይን መጠን ከ Backend ማምጣት
+        window.onload = function() {
+            fetchWalletBalance(telegramUser.id);
+        };
+
+        function fetchWalletBalance(userId) {
+            fetch(`/api/wallet/${userId}`)
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById("my-coins").innerText = data.coins || 350;
+                })
+                .catch(() => {
+                    document.getElementById("my-coins").innerText = "350";
+                });
+        }
+
+        // Jitsi Multi-seat Stream Core Engine
         function initializeMelaSpace(isAudioOnly) {
             const domain = "meet.jit.si";
             const options = {
-                roomName: "Mela_Live_MultiGuest_Space_Room_9988", 
+                roomName: "Mela_Live_MultiGuest_Space_Room_Global", 
                 width: "100%",
                 height: "100%",
                 parentNode: document.getElementById("jitsi-meet-container"),
                 userInfo: {
-                    displayName: 'Melaku (Host)'
+                    displayName: telegramUser.name
                 },
                 configOverwrite: {
                     startWithAudioMuted: false,
-                    startWithVideoMuted: isAudioOnly, // ተጠቃሚው በመረጠው መሰረት ቪዲዮን ማፈን/ማብራት
+                    startWithVideoMuted: isAudioOnly,
                     prejoinPageEnabled: false, 
                     disableDeepLinking: true,
                     enableWelcomePage: false,
                     disableSelfView: false,   
-                    
-                    // ለሞባይል ፖርትሬት የኔትወርክና ጥራት ማስተካከያ
                     resolution: 240, 
                     constraints: {
                         video: {
@@ -155,27 +212,28 @@
                             width: { ideal: 320, max: 480, min: 160 }
                         }
                     },
-                    toolbarButtons: ['microphone', 'camera', 'chat', 'hangup']
+                    toolbarButtons: ['microphone', 'camera', 'chat', 'hangup', 'tileview']
                 },
                 interfaceConfigOverwrite: {
-                    TILE_VIEW_MAX_COLUMNS: 1, // በሞባይል ፖርትሬት 1 አምድ ብቻ አድርጎ በቁመት መደርደር
-                    MOBILE_APP_PROMO: false
+                    TILE_VIEW_MAX_COLUMNS: 2,
+                    MOBILE_APP_PROMO: false,
+                    SHOW_JITSI_WATERMARK: false
                 }
             };
             
-            // የተንክኪ ቁልፎቹን ማጽዳት
             document.getElementById("jitsi-meet-container").innerHTML = "";
-            
-            // የJitsi መድረክን መክፈት
             api = new JitsiMeetExternalAPI(domain, options);
             
-            // የቁልፍ ገጽታ ማስተካከያ
             document.getElementById("main-join-btn").style.background = "#444";
             document.getElementById("main-join-btn").innerText = "🚪 መድረክ ልቀቅ";
         }
 
         function resetToMenu() {
-            location.reload(); // ወደ ዋናው የንክኪ ምርጫ ማውጫ መመለሻ
+            if (api) {
+                api.dispose();
+                api = null;
+            }
+            location.reload();
         }
 
         // Tab Switching Engine
@@ -186,14 +244,34 @@
             document.getElementById(`tab-${tabName}`).classList.add('active');
         }
 
+        // Live Chat Module
+        function sendChatMessage() {
+            const input = document.getElementById("chat-text-input");
+            const text = input.value.trim();
+            if (text === "") return;
+
+            const chatList = document.getElementById("chat-messages-container");
+            const msgDiv = document.createElement("div");
+            msgDiv.className = "chat-msg";
+            msgDiv.innerHTML = `<b style="color:#25f4ee;">${telegramUser.name}:</b> ${text}`;
+            chatList.appendChild(msgDiv);
+            
+            input.value = "";
+            chatList.scrollTop = chatList.scrollHeight;
+        }
+
         // SFX Module
         function playEffect(effectName) {
             let audioUrl = 'https://actions.google.com/sounds/v1/crowds/human_applause.ogg';
             let audio = new Audio(audioUrl);
-            audio.play().catch(() => alert("👏 ጭብጨባ ተሰማ!"));
+            audio.play().catch(() => alert("👏 ጭብጨባ!"));
+            
+            const chatList = document.getElementById("chat-messages-container");
+            chatList.innerHTML += `<div class="chat-msg"><i>👏 ${telegramUser.name} አጨበጨቡ!</i></div>`;
+            chatList.scrollTop = chatList.scrollHeight;
         }
 
-        // የጀርባ ሙዚቃ
+        // Background Music Module
         function toggleBackgroundMusic() {
             if (!isMusicPlaying) {
                 bgMusic = new Audio('https://actions.google.com/sounds/v1/weather/rain_heavy_loud.ogg'); 
@@ -210,15 +288,36 @@
         }
 
         function triggerGame(gameName) {
-            alert(`የ ${gameName} መጫወቻ ገጽ አሁን ይከፈታል!`);
+            alert(`የ ${gameName} ጨዋታ በቅርቡ ይጀምራል!`);
         }
 
+        // Gift Drawer Logic
         function toggleGiftDrawer() {
             document.getElementById("gift-panel").classList.toggle("open");
         }
 
+        function selectGift(el, name, cost) {
+            document.querySelectorAll('.gift-card').forEach(card => card.classList.remove('selected'));
+            el.classList.add('selected');
+            selectedGiftData = { name, cost };
+        }
+
         function sendGift() {
-            alert("የቴሌብር የክፍያ ትዕዛዝ ወደ ስልክዎ ተልኳል!");
+            let currentCoins = parseInt(document.getElementById("my-coins").innerText) || 0;
+            if (currentCoins < selectedGiftData.cost) {
+                alert("በቂ ኮይን የለዎትም! እባክዎ በዋሌት በኩል ኮይን ይግዙ።");
+                return;
+            }
+
+            // ኮይን መቀነስ
+            currentCoins -= selectedGiftData.cost;
+            document.getElementById("my-coins").innerText = currentCoins;
+
+            const chatList = document.getElementById("chat-messages-container");
+            chatList.innerHTML += `<div class="chat-msg" style="color:#ffdd67;">🎁 <b>${telegramUser.name}</b> ለክፍሉ <b>${selectedGiftData.name}</b> አበረከቱ!</div>`;
+            chatList.scrollTop = chatList.scrollHeight;
+
+            alert(`🎉 ${selectedGiftData.name} በተሳካ ሁኔታ ተልኳል!`);
             toggleGiftDrawer();
         }
     </script>
